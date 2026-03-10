@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill 오케스트레이션 - Claude Code Camp Day 2</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d2e;
+    --surface2: #252840;
+    --accent: #6c63ff;
+    --accent2: #00d2ff;
+    --accent3: #ff6b9d;
+    --text: #e8e8f0;
+    --text-dim: #8888a0;
+    --glow: rgba(108,99,255,0.35);
+    --radius: 16px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    margin-top: 40px;
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-size: 1rem;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 32px;
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 5px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  .tab-btn {
+    padding: 12px 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--text); background: var(--surface2); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: #fff;
+    box-shadow: 0 2px 12px var(--glow);
+  }
+
+  /* Canvas */
+  .canvas {
+    width: 90vw;
+    max-width: 1100px;
+    min-height: 520px;
+    margin-top: 32px;
+    position: relative;
+    flex: 1;
+  }
+
+  .tab-panel {
+    display: none;
+    width: 100%;
+    min-height: 520px;
+    position: relative;
+  }
+
+  .tab-panel.active { display: flex; justify-content: center; align-items: center; }
+
+  /* Blocks */
+  .block {
+    position: absolute;
+    padding: 18px 28px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: default;
+    z-index: 2;
+    white-space: nowrap;
+  }
+
+  .block:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  }
+
+  .block .icon { font-size: 1.5rem; }
+
+  .block.purple  { background: linear-gradient(135deg, #6c63ff, #8b5cf6); }
+  .block.blue    { background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
+  .block.pink    { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+  .block.green   { background: linear-gradient(135deg, #22c55e, #10b981); }
+  .block.orange  { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+  .block.teal    { background: linear-gradient(135deg, #14b8a6, #0ea5e9); }
+  .block.indigo  { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+  .block.slate   { background: linear-gradient(135deg, #475569, #64748b); }
+
+  .block-label {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.65);
+    position: absolute;
+    top: -20px;
+    left: 0;
+    font-weight: 400;
+  }
+
+  /* SVG Arrows */
+  .arrows-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .arrow-path {
+    fill: none;
+    stroke: var(--accent2);
+    stroke-width: 2.5;
+    stroke-dasharray: 8,6;
+    opacity: 0.7;
+  }
+
+  .arrow-path.animated {
+    animation: dashFlow 1.2s linear infinite;
+  }
+
+  @keyframes dashFlow {
+    to { stroke-dashoffset: -28; }
+  }
+
+  .arrow-head {
+    fill: var(--accent2);
+    opacity: 0.8;
+  }
+
+  /* Pulse dot on arrow */
+  .flow-dot {
+    fill: var(--accent2);
+    filter: drop-shadow(0 0 6px var(--accent2));
+  }
+
+  /* Tab 1 - Simple Orchestration */
+  .t1-enter { animation: t1SlideDown 0.8s ease-out both; }
+  .t1-merge { animation: t1MergeIn 1s ease-out 0.6s both; }
+
+  @keyframes t1SlideDown {
+    from { opacity:0; transform: translateY(-40px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  @keyframes t1MergeIn {
+    from { opacity:0; transform: scale(0.7); }
+    to   { opacity:1; transform: scale(1); }
+  }
+
+  /* Tab 2 - Sequential */
+  .t2-step1 { animation: fadeSlideRight 0.5s ease-out 0.1s both; }
+  .t2-step2 { animation: fadeSlideRight 0.5s ease-out 0.4s both; }
+  .t2-step3 { animation: fadeSlideRight 0.5s ease-out 0.7s both; }
+  .t2-step4 { animation: fadeSlideRight 0.5s ease-out 1.0s both; }
+  .t2-step5 { animation: fadeSlideRight 0.5s ease-out 1.3s both; }
+
+  @keyframes fadeSlideRight {
+    from { opacity:0; transform: translateX(-30px); }
+    to   { opacity:1; transform: translateX(0); }
+  }
+
+  /* Tab 3 - Pipeline */
+  .t3-s1 { animation: pipeIn 0.4s ease-out 0.1s both; }
+  .t3-s2 { animation: pipeIn 0.4s ease-out 0.5s both; }
+  .t3-s3 { animation: pipeIn 0.4s ease-out 0.9s both; }
+  .t3-s4 { animation: pipeIn 0.4s ease-out 1.3s both; }
+  .t3-arrow1 { animation: arrowFade 0.3s ease-out 0.4s both; }
+  .t3-arrow2 { animation: arrowFade 0.3s ease-out 0.8s both; }
+  .t3-arrow3 { animation: arrowFade 0.3s ease-out 1.2s both; }
+
+  @keyframes pipeIn {
+    from { opacity:0; transform: scale(0.6) translateX(-20px); }
+    to   { opacity:1; transform: scale(1) translateX(0); }
+  }
+  @keyframes arrowFade {
+    from { opacity:0; }
+    to   { opacity:1; }
+  }
+
+  /* Tab 4 - Reusability */
+  .reuse-center {
+    transition: all 0.4s;
+  }
+  .reuse-center.highlighted {
+    box-shadow: 0 0 40px rgba(108,99,255,0.8), 0 0 80px rgba(108,99,255,0.4);
+    transform: scale(1.08);
+  }
+  .reuse-target {
+    transition: all 0.4s;
+    opacity: 0.45;
+  }
+  .reuse-target.highlighted {
+    opacity: 1;
+    box-shadow: 0 0 30px rgba(0,210,255,0.5);
+  }
+  .reuse-line {
+    transition: all 0.4s;
+    opacity: 0.2;
+  }
+  .reuse-line.highlighted {
+    opacity: 1;
+    stroke: var(--accent) !important;
+    stroke-width: 3 !important;
+  }
+
+  .lego-msg {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.1rem;
+    color: var(--accent2);
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.5s;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .lego-msg.show { opacity: 1; }
+
+  .clickable { cursor: pointer; }
+
+  /* Watermark */
+  .watermark {
+    margin-top: auto;
+    padding: 24px;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    opacity: 0.5;
+    letter-spacing: 1px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    h1 { font-size: 1.5rem; }
+    .tabs { flex-wrap: wrap; justify-content: center; }
+    .tab-btn { padding: 10px 16px; font-size: 0.85rem; }
+    .block { padding: 12px 18px; font-size: 0.85rem; }
+    .canvas { width: 95vw; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Skill 오케스트레이션</h1>
+<p class="subtitle">스킬을 조합하여 복잡한 워크플로우를 구성하는 패턴</p>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab(0)">단순 오케스트레이션</button>
+  <button class="tab-btn" onclick="switchTab(1)">멀티소스 + 액션</button>
+  <button class="tab-btn" onclick="switchTab(2)">파이프라인형</button>
+  <button class="tab-btn" onclick="switchTab(3)">재사용성</button>
+</div>
+
+<div class="canvas">
+
+  <!-- ============ TAB 1: 단순 오케스트레이션 ============ -->
+  <div class="tab-panel active" id="panel0">
+    <svg class="arrows-svg" viewBox="0 0 1100 520" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <marker id="ah1" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+          <polygon points="0 0, 10 4, 0 8" class="arrow-head"/>
+        </marker>
+      </defs>
+      <!-- Left arrow -->
+      <path d="M 350 120 C 350 200, 460 260, 480 300" class="arrow-path animated" marker-end="url(#ah1)"/>
+      <circle r="5" class="flow-dot">
+        <animateMotion dur="1.5s" repeatCount="indefinite"
+          path="M 350 120 C 350 200, 460 260, 480 300"/>
+      </circle>
+      <!-- Right arrow -->
+      <path d="M 750 120 C 750 200, 600 260, 560 300" class="arrow-path animated" marker-end="url(#ah1)" style="animation-delay:0.4s"/>
+      <circle r="5" class="flow-dot">
+        <animateMotion dur="1.5s" repeatCount="indefinite" begin="0.4s"
+          path="M 750 120 C 750 200, 600 260, 560 300"/>
+      </circle>
+    </svg>
+
+    <div class="block purple t1-enter" style="left:240px; top:60px">
+      <span class="block-label">소스 스킬</span>
+      <span class="icon">📧</span> /email-briefing
+    </div>
+    <div class="block blue t1-enter" style="left:640px; top:60px; animation-delay:0.2s">
+      <span class="block-label">소스 스킬</span>
+      <span class="icon">📅</span> /meeting-recap
+    </div>
+    <div class="block green t1-merge" style="left:390px; top:310px">
+      <span class="block-label">오케스트레이션 스킬</span>
+      <span class="icon">📋</span> /morning-briefing
+    </div>
+  </div>
+
+  <!-- ============ TAB 2: 멀티소스 + 액션 ============ -->
+  <div class="tab-panel" id="panel1">
+    <svg class="arrows-svg" viewBox="0 0 1100 520" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <marker id="ah2" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+          <polygon points="0 0, 10 4, 0 8" class="arrow-head"/>
+        </marker>
+      </defs>
+      <!-- Source to center -->
+      <path d="M 220 100 L 440 220" class="arrow-path animated" marker-end="url(#ah2)"/>
+      <path d="M 220 260 L 440 255" class="arrow-path animated" marker-end="url(#ah2)" style="animation-delay:0.3s"/>
+      <path d="M 220 420 L 440 290" class="arrow-path animated" marker-end="url(#ah2)" style="animation-delay:0.6s"/>
+      <!-- Center to action -->
+      <path d="M 660 260 L 830 260" class="arrow-path animated" marker-end="url(#ah2)" style="animation-delay:0.9s"/>
+      <!-- Flow dots -->
+      <circle r="5" class="flow-dot"><animateMotion dur="1.5s" repeatCount="indefinite" path="M 220 100 L 440 220"/></circle>
+      <circle r="5" class="flow-dot"><animateMotion dur="1.5s" repeatCount="indefinite" begin="0.3s" path="M 220 260 L 440 255"/></circle>
+      <circle r="5" class="flow-dot"><animateMotion dur="1.5s" repeatCount="indefinite" begin="0.6s" path="M 220 420 L 440 290"/></circle>
+      <circle r="5" class="flow-dot"><animateMotion dur="1.5s" repeatCount="indefinite" begin="0.9s" path="M 660 260 L 830 260"/></circle>
+    </svg>
+
+    <div class="block purple t2-step1" style="left:60px; top:75px">
+      <span class="icon">📧</span> /email-briefing
+    </div>
+    <div class="block blue t2-step2" style="left:60px; top:235px">
+      <span class="icon">📅</span> /meeting-recap
+    </div>
+    <div class="block orange t2-step3" style="left:60px; top:395px">
+      <span class="icon">💬</span> /slack-digest
+    </div>
+    <div class="block teal t2-step4" style="left:450px; top:225px">
+      <span class="block-label">정리 & 요약</span>
+      <span class="icon">🧠</span> AI 종합 정리
+    </div>
+    <div class="block green t2-step5" style="left:840px; top:225px">
+      <span class="block-label">액션</span>
+      <span class="icon">🚀</span> 슬랙 전송
+    </div>
+  </div>
+
+  <!-- ============ TAB 3: 파이프라인형 ============ -->
+  <div class="tab-panel" id="panel2">
+    <svg class="arrows-svg" viewBox="0 0 1100 520" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <marker id="ah3" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+          <polygon points="0 0, 10 4, 0 8" class="arrow-head"/>
+        </marker>
+      </defs>
+      <path d="M 235 260 L 320 260" class="arrow-path animated t3-arrow1" marker-end="url(#ah3)"/>
+      <path d="M 530 260 L 610 260" class="arrow-path animated t3-arrow2" marker-end="url(#ah3)"/>
+      <path d="M 800 260 L 880 260" class="arrow-path animated t3-arrow3" marker-end="url(#ah3)"/>
+      <circle r="5" class="flow-dot t3-arrow1"><animateMotion dur="0.8s" repeatCount="indefinite" path="M 235 260 L 320 260"/></circle>
+      <circle r="5" class="flow-dot t3-arrow2"><animateMotion dur="0.8s" repeatCount="indefinite" begin="0.4s" path="M 530 260 L 610 260"/></circle>
+      <circle r="5" class="flow-dot t3-arrow3"><animateMotion dur="0.8s" repeatCount="indefinite" begin="0.8s" path="M 800 260 L 880 260"/></circle>
+    </svg>
+
+    <!-- Step labels -->
+    <div style="position:absolute;top:180px;left:90px;color:var(--text-dim);font-size:0.8rem">STEP 1</div>
+    <div style="position:absolute;top:180px;left:360px;color:var(--text-dim);font-size:0.8rem">STEP 2</div>
+    <div style="position:absolute;top:180px;left:640px;color:var(--text-dim);font-size:0.8rem">STEP 3</div>
+    <div style="position:absolute;top:180px;left:920px;color:var(--text-dim);font-size:0.8rem">STEP 4</div>
+
+    <div class="block blue t3-s1" style="left:55px; top:225px">
+      <span class="icon">📅</span> 미팅 요약
+    </div>
+    <div class="block indigo t3-s2" style="left:330px; top:225px">
+      <span class="icon">📝</span> 액션아이템 추출
+    </div>
+    <div class="block purple t3-s3" style="left:620px; top:225px">
+      <span class="icon">🎫</span> Jira 생성
+    </div>
+    <div class="block green t3-s4" style="left:890px; top:225px">
+      <span class="icon">🔔</span> 슬랙 알림
+    </div>
+
+    <!-- Pipeline progress bar -->
+    <div style="position:absolute; bottom:80px; left:50%; transform:translateX(-50%); width:80%; max-width:800px;">
+      <div style="height:4px; background:var(--surface2); border-radius:2px; overflow:hidden;">
+        <div style="height:100%; width:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:2px; animation: progressBar 2s ease-in-out infinite;">
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:8px; color:var(--text-dim); font-size:0.75rem;">
+        <span>입력</span><span>처리</span><span>생성</span><span>알림</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 4: 재사용성 ============ -->
+  <div class="tab-panel" id="panel3">
+    <svg class="arrows-svg" id="reuse-svg" viewBox="0 0 1100 520" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <marker id="ah4" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+          <polygon points="0 0, 10 4, 0 8" class="arrow-head"/>
+        </marker>
+      </defs>
+      <line x1="340" y1="260" x2="620" y2="100" class="arrow-path reuse-line" id="rl1" stroke-dasharray="6,4" marker-end="url(#ah4)"/>
+      <line x1="340" y1="260" x2="620" y2="260" class="arrow-path reuse-line" id="rl2" stroke-dasharray="6,4" marker-end="url(#ah4)"/>
+      <line x1="340" y1="260" x2="620" y2="420" class="arrow-path reuse-line" id="rl3" stroke-dasharray="6,4" marker-end="url(#ah4)"/>
+    </svg>
+
+    <div class="block purple reuse-center clickable" style="left:130px; top:230px" id="reuse-src"
+         onclick="toggleReuse()" onmouseenter="highlightReuse(true)" onmouseleave="highlightReuse(false)">
+      <span class="icon">📧</span> /email-briefing
+      <span style="font-size:0.7rem; opacity:0.7; margin-left:4px;">클릭!</span>
+    </div>
+
+    <div class="block green reuse-target" style="left:630px; top:70px" id="rt1">
+      <span class="icon">📋</span> /morning-briefing
+    </div>
+    <div class="block teal reuse-target" style="left:630px; top:230px" id="rt2">
+      <span class="icon">📊</span> /weekly-report
+    </div>
+    <div class="block pink reuse-target" style="left:630px; top:390px" id="rt3">
+      <span class="icon">🔍</span> /customer-insights
+    </div>
+
+    <div class="lego-msg" id="lego-msg">
+      🧩 레고 블록처럼 조합 — 한 번 만든 스킬을 여러 곳에서 재사용!
+    </div>
+  </div>
+
+</div>
+
+<div class="watermark">Claude Code Camp Day 2</div>
+
+<script>
+  // --- Tab switching ---
+  const btns = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.tab-panel');
+
+  function switchTab(idx) {
+    btns.forEach((b,i) => b.classList.toggle('active', i===idx));
+    panels.forEach((p,i) => {
+      const wasActive = p.classList.contains('active');
+      p.classList.toggle('active', i===idx);
+      // Re-trigger animations by re-adding classes
+      if (i===idx && !wasActive) {
+        reAnimate(p);
+      }
+    });
+  }
+
+  function reAnimate(panel) {
+    const animated = panel.querySelectorAll('[class*="t1-"], [class*="t2-"], [class*="t3-"]');
+    animated.forEach(el => {
+      const cls = el.className;
+      el.className = '';
+      void el.offsetWidth; // force reflow
+      el.className = cls;
+    });
+  }
+
+  // --- Tab 4: Reuse interactions ---
+  let reuseActive = false;
+
+  function highlightReuse(on) {
+    if (reuseActive) return;
+    setReuse(on);
+  }
+
+  function toggleReuse() {
+    reuseActive = !reuseActive;
+    setReuse(reuseActive);
+  }
+
+  function setReuse(on) {
+    document.getElementById('reuse-src').classList.toggle('highlighted', on);
+    ['rt1','rt2','rt3'].forEach(id => document.getElementById(id).classList.toggle('highlighted', on));
+    ['rl1','rl2','rl3'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.toggle('highlighted', on);
+      el.classList.toggle('animated', on);
+    });
+    document.getElementById('lego-msg').classList.toggle('show', on);
+  }
+</script>
+
+<style>
+  @keyframes progressBar {
+    0%   { transform: translateX(-100%); }
+    50%  { transform: translateX(0); }
+    100% { transform: translateX(100%); }
+  }
+</style>
+
+</body>
+</html>
