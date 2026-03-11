@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Camp Day 2 — 오늘의 여정</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #a78bfa;
+    margin-bottom: 6px;
+    text-align: center;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .stage-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stage-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid #334155;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .stage-btn:hover {
+    border-color: #a78bfa;
+    color: #a78bfa;
+  }
+
+  .stage-btn.active {
+    background: #a78bfa;
+    border-color: #a78bfa;
+    color: #0f1117;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    width: 1100px;
+    max-width: 100%;
+    height: 560px;
+    background: #161b27;
+    border-radius: 16px;
+    border: 1.5px solid #1e293b;
+    overflow: hidden;
+  }
+
+  svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+  }
+
+  .node {
+    transition: opacity 0.5s;
+  }
+
+  .node-claude rect {
+    fill: #1e293b;
+    stroke: #a78bfa;
+    stroke-width: 2.5;
+  }
+
+  .node-tool rect {
+    fill: #0f2420;
+    stroke: #34d399;
+    stroke-width: 1.5;
+  }
+
+  .node-mcp rect {
+    fill: #1a1a2e;
+    stroke: #f472b6;
+    stroke-width: 1.5;
+  }
+
+  .node-skill rect {
+    fill: #1e1a0e;
+    stroke: #fbbf24;
+    stroke-width: 1.5;
+  }
+
+  .node-orch rect {
+    fill: #1e1510;
+    stroke: #fb923c;
+    stroke-width: 2;
+  }
+
+  .node-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    fill: #e2e8f0;
+    pointer-events: none;
+  }
+
+  .node-sublabel {
+    font-size: 9px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    fill: #64748b;
+    pointer-events: none;
+  }
+
+  .arrow {
+    transition: opacity 0.5s;
+    fill: none;
+    stroke-width: 1.8;
+  }
+
+  .arrow-main  { stroke: #a78bfa; }
+  .arrow-tool  { stroke: #34d399; stroke-dasharray: 4 3; }
+  .arrow-mcp   { stroke: #f472b6; stroke-dasharray: 4 3; }
+  .arrow-skill { stroke: #fbbf24; }
+  .arrow-skill-tool { stroke: #fbbf24; stroke-dasharray: 3 2; }
+  .arrow-orch  { stroke: #fb923c; stroke-width: 2.2; }
+
+  .stage-label {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.76rem;
+    color: #475569;
+    background: #0f1117;
+    padding: 4px 12px;
+    border-radius: 12px;
+    border: 1px solid #1e293b;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .message-bar {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #1e1a2e, #1a1a2e);
+    border: 1.5px solid #4c1d95;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    color: #c4b5fd;
+    text-align: center;
+    max-width: 1100px;
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .progress-bar {
+    display: flex;
+    gap: 6px;
+    margin-top: 16px;
+    align-items: center;
+  }
+
+  .progress-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #334155;
+    transition: background 0.3s;
+  }
+
+  .progress-dot.done    { background: #a78bfa; }
+  .progress-dot.current { background: #a78bfa; box-shadow: 0 0 6px #a78bfa; }
+
+  .nav-btns {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .nav-btn {
+    padding: 8px 22px;
+    border-radius: 8px;
+    border: 1.5px solid #334155;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:hover:not(:disabled) { border-color: #a78bfa; color: #a78bfa; }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .nav-btn.primary {
+    background: #a78bfa;
+    border-color: #a78bfa;
+    color: #0f1117;
+  }
+
+  .nav-btn.primary:hover:not(:disabled) {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+
+<h1>Day 2: 나만의 Skill 만들기 — 오늘의 여정</h1>
+<p class="subtitle">오늘 0번에서 시작해서 4번으로 갈 겁니다</p>
+
+<div class="stage-nav" id="stageNav"></div>
+
+<div class="canvas-wrap">
+  <!--
+    Layout (viewBox 0 0 1100 560):
+    Person      x≈70     Claude Code  x≈240-370   Skill(s)  x≈430-560   Tools/MCP  x≈620-720
+    Stage 4: Orch container x≈400-1080, y≈20-530
+  -->
+  <svg id="diagram" viewBox="0 0 1100 560" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="ah-purple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0,8 3,0 6" fill="#a78bfa"/>
+      </marker>
+      <marker id="ah-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0,8 3,0 6" fill="#34d399"/>
+      </marker>
+      <marker id="ah-pink" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0,8 3,0 6" fill="#f472b6"/>
+      </marker>
+      <marker id="ah-yellow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0,8 3,0 6" fill="#fbbf24"/>
+      </marker>
+      <marker id="ah-orange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0,8 3,0 6" fill="#fb923c"/>
+      </marker>
+      <filter id="glow-purple">
+        <feGaussianBlur stdDeviation="3" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-orange">
+        <feGaussianBlur stdDeviation="3" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <pattern id="dotGrid" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+        <circle cx="8" cy="8" r="1" fill="#fb923c" opacity="0.35"/>
+      </pattern>
+    </defs>
+
+    <!-- ══════════════════════════════════
+         PERSON  (x≈70, y≈200)
+    ══════════════════════════════════ -->
+    <g id="nodePerson">
+      <circle cx="70" cy="195" r="22" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+      <text x="70" y="200" text-anchor="middle" font-size="22">🧑</text>
+      <text x="70" y="228" class="node-label" fill="#38bdf8">사용자</text>
+    </g>
+
+    <!-- ══════════════════════════════════
+         CLAUDE CODE  (x=240-370, y=175-235)
+    ══════════════════════════════════ -->
+    <g id="nodeClaude" class="node node-claude" filter="url(#glow-purple)">
+      <rect x="240" y="175" width="130" height="54" rx="10" fill="#1e293b" stroke="#a78bfa" stroke-width="2.5"/>
+      <text x="305" y="197" class="node-label" fill="#a78bfa" font-size="13">Claude Code</text>
+      <text x="305" y="215" class="node-sublabel">🤖 AI 에이전트</text>
+    </g>
+
+    <!-- ══════════════════════════════════
+         NATIVE TOOLS  (x=620-720, y=30-250)
+    ══════════════════════════════════ -->
+    <g id="toolRead" class="node node-tool">
+      <rect x="620" y="34" width="90" height="32" rx="6"/>
+      <text x="665" y="50" class="node-label" fill="#34d399">Read</text>
+    </g>
+    <g id="toolWrite" class="node node-tool">
+      <rect x="620" y="76" width="90" height="32" rx="6"/>
+      <text x="665" y="92" class="node-label" fill="#34d399">Write</text>
+    </g>
+    <g id="toolBash" class="node node-tool">
+      <rect x="620" y="118" width="90" height="32" rx="6"/>
+      <text x="665" y="134" class="node-label" fill="#34d399">Bash</text>
+    </g>
+    <g id="toolWeb" class="node node-tool">
+      <rect x="620" y="160" width="90" height="32" rx="6"/>
+      <text x="665" y="176" class="node-label" fill="#34d399" font-size="9.5">WebSearch</text>
+    </g>
+    <g id="toolAsk" class="node node-tool">
+      <rect x="620" y="202" width="90" height="32" rx="6"/>
+      <text x="665" y="218" class="node-label" fill="#34d399" font-size="9">AskUser...</text>
+    </g>
+
+    <!-- MCP -->
+    <g id="mcpAtlassian" class="node node-mcp">
+      <rect x="620" y="254" width="90" height="32" rx="6"/>
+      <text x="665" y="270" class="node-label" fill="#f472b6" font-size="10">Atlassian</text>
+    </g>
+    <g id="mcpGoogle" class="node node-mcp">
+      <rect x="620" y="296" width="90" height="32" rx="6"/>
+      <text x="665" y="312" class="node-label" fill="#f472b6" font-size="10.5">Google</text>
+    </g>
+    <g id="mcpSlack" class="node node-mcp">
+      <rect x="620" y="338" width="90" height="32" rx="6"/>
+      <text x="665" y="354" class="node-label" fill="#f472b6" font-size="10.5">Slack</text>
+    </g>
+
+    <!-- Fog over all tools (stage 0) -->
+    <g id="fogLayer" style="transition:opacity 0.6s">
+      <rect x="610" y="24" width="110" height="222" rx="8" fill="#0f1117" opacity="1"/>
+      <text x="665" y="140" text-anchor="middle" font-size="30">❓</text>
+    </g>
+    <g id="fogMcp" style="transition:opacity 0.6s">
+      <rect x="610" y="246" width="110" height="136" rx="8" fill="#0f1117" opacity="1"/>
+    </g>
+    <!-- Cover for stage 4: hide all native tool/MCP nodes (entire right column) -->
+    <g id="fogStage4" style="transition:opacity 0.4s" opacity="0">
+      <rect x="610" y="20" width="120" height="540" fill="#161b27" opacity="1"/>
+    </g>
+
+    <!-- ══════════════════════════════════
+         SKILL NODES  (x=430-560, between Claude and Tools)
+         Stage 2: /email-briefing (single skill)
+         Stage 3: /email-briefing + /meeting-recap
+         Stage 4: orchestration
+    ══════════════════════════════════ -->
+
+    <!-- Stage 2: single skill /wiki-qa → Atlassian MCP -->
+    <g id="skillSingle" class="node node-skill" opacity="0">
+      <rect x="428" y="175" width="118" height="54" rx="8"/>
+      <text x="487" y="197" class="node-label" fill="#fbbf24" font-size="10">/wiki-qa</text>
+      <text x="487" y="213" class="node-sublabel">📚 Confluence Q&amp;A</text>
+    </g>
+
+    <!-- Stage 3: three skills with 1:1 MCP mapping -->
+    <!-- /wiki-qa → Atlassian (top) -->
+    <g id="skillWiki" class="node node-skill" opacity="0">
+      <rect x="428" y="76" width="118" height="46" rx="8"/>
+      <text x="487" y="95" class="node-label" fill="#fbbf24" font-size="10">/wiki-qa</text>
+      <text x="487" y="109" class="node-sublabel">📚 Confluence Q&amp;A</text>
+    </g>
+    <!-- /email-briefing → Google (middle) -->
+    <g id="skillEmail" class="node node-skill" opacity="0">
+      <rect x="428" y="178" width="118" height="46" rx="8"/>
+      <text x="487" y="197" class="node-label" fill="#fbbf24" font-size="10">/email-briefing</text>
+      <text x="487" y="211" class="node-sublabel">📧 Gmail 요약</text>
+    </g>
+    <!-- /meeting-recap → Google Calendar (lower) -->
+    <g id="skillMeeting" class="node node-skill" opacity="0">
+      <rect x="428" y="280" width="118" height="46" rx="8"/>
+      <text x="487" y="299" class="node-label" fill="#fbbf24" font-size="10">/meeting-recap</text>
+      <text x="487" y="313" class="node-sublabel">📅 Calendar 요약</text>
+    </g>
+
+    <!-- Stage 4: Container layout
+         /morning-briefing = big outer box
+         Inside: /email-briefing → /meeting-recap → /slack-send
+         Below: Gmail MCP, Calendar MCP, Slack MCP
+         Canvas 900x420, container right edge ~870
+    -->
+    <!--
+      Stage 4: /morning-briefing = workflow canvas (x=400-900, y=80-260)
+      Inside: unit skills only. MCP+Tools all below.
+      Layout (1100x560 viewBox):
+        Container: x=400, y=80, w=500, h=180
+        Unit skills (w=110,h=100): centers at x=480, 650, 820, y=120-220
+        Bottom row (y=330-366, w=110): Gmail(480), Calendar(650), Slack(820), WebSearch(940), Read/Write(1050)
+    -->
+    <!-- Outer container: /morning-briefing — workflow canvas (unit skills only) -->
+    <g id="orchEntry" opacity="0">
+      <rect x="400" y="80" width="500" height="180" rx="14"
+            fill="#130f07" stroke="#fb923c" stroke-width="2" stroke-dasharray="8 4"/>
+      <rect x="400" y="80" width="500" height="180" rx="14"
+            fill="url(#dotGrid)" opacity="0.5"/>
+      <!-- Header strip -->
+      <rect x="400" y="80" width="500" height="28" rx="14" fill="#fb923c" fill-opacity="0.15"/>
+      <rect x="400" y="94" width="500" height="14" fill="#fb923c" fill-opacity="0.15"/>
+      <!-- n8n-style traffic light dots -->
+      <circle cx="418" cy="94" r="5" fill="#fb923c" opacity="0.9"/>
+      <circle cx="432" cy="94" r="5" fill="#fbbf24" opacity="0.7"/>
+      <circle cx="446" cy="94" r="5" fill="#34d399" opacity="0.5"/>
+      <text x="460" y="99" class="node-label" fill="#fb923c" font-size="11" font-weight="700">/morning-briefing</text>
+      <text x="894" y="99" class="node-sublabel" fill="#fb923c" font-size="8" text-anchor="end" opacity="0.7">workflow canvas</text>
+    </g>
+
+    <!-- Inner unit skill 1: /email-briefing (center x=480) -->
+    <g id="orchEmail" class="node node-skill" opacity="0">
+      <rect x="425" y="118" width="110" height="100" rx="10"/>
+      <text x="480" y="163" class="node-label" fill="#fbbf24" font-size="10">/email-briefing</text>
+      <text x="480" y="180" class="node-sublabel" font-size="9">📧 이메일 요약</text>
+    </g>
+    <!-- Inner unit skill 2: /meeting-recap (center x=650) -->
+    <g id="orchMeeting" class="node node-skill" opacity="0">
+      <rect x="595" y="118" width="110" height="100" rx="10"/>
+      <text x="650" y="163" class="node-label" fill="#fbbf24" font-size="10">/meeting-recap</text>
+      <text x="650" y="180" class="node-sublabel" font-size="9">📅 미팅 정리</text>
+    </g>
+    <!-- Inner unit skill 3: /slack-send (center x=820) -->
+    <g id="orchOutput" class="node node-skill" opacity="0">
+      <rect x="765" y="118" width="110" height="100" rx="10"/>
+      <text x="820" y="163" class="node-label" fill="#fbbf24" font-size="10">/slack-send</text>
+      <text x="820" y="180" class="node-sublabel" font-size="9">💬 슬랙 전송</text>
+    </g>
+
+    <!-- Bottom row: MCP nodes (below container, aligned with skills) -->
+    <g id="orchMcpGmail" class="node node-mcp" opacity="0">
+      <rect x="425" y="330" width="110" height="36" rx="8"/>
+      <text x="480" y="353" class="node-label" fill="#f472b6" font-size="10">Gmail MCP</text>
+    </g>
+    <g id="orchMcpCalendar" class="node node-mcp" opacity="0">
+      <rect x="595" y="330" width="110" height="36" rx="8"/>
+      <text x="650" y="353" class="node-label" fill="#f472b6" font-size="10">Calendar MCP</text>
+    </g>
+    <g id="orchMcpSlack" class="node node-mcp" opacity="0">
+      <rect x="765" y="330" width="110" height="36" rx="8"/>
+      <text x="820" y="353" class="node-label" fill="#f472b6" font-size="10">Slack MCP</text>
+    </g>
+
+    <!-- Bottom row: Native tool nodes (to the right of MCP nodes) -->
+    <g id="orchToolWeb" class="node node-tool" opacity="0">
+      <rect x="890" y="330" width="100" height="36" rx="8"/>
+      <text x="940" y="353" class="node-label" fill="#34d399" font-size="10">WebSearch</text>
+    </g>
+    <g id="orchToolRead" class="node node-tool" opacity="0">
+      <rect x="1000" y="330" width="90" height="36" rx="8"/>
+      <text x="1045" y="353" class="node-label" fill="#34d399" font-size="9.5">Read/Write</text>
+    </g>
+
+    <!-- ══════════════════════════════════
+         ARROWS
+    ══════════════════════════════════ -->
+
+    <!-- Person ↔ Claude (always visible) -->
+    <path id="arrPersonClaude" class="arrow arrow-main"
+          d="M 93 200 L 238 198" marker-end="url(#ah-purple)"/>
+    <path id="arrClaudePerson" class="arrow arrow-main"
+          d="M 240 188 L 94 188" marker-end="url(#ah-purple)"/>
+
+    <!-- Stage 1: Claude → Native Tools (direct, no skill) -->
+    <path id="arrClaudeRead"  class="arrow arrow-tool" opacity="0"
+          d="M 370 185 C 490 120 560 60 618 50" marker-end="url(#ah-green)"/>
+    <path id="arrClaudeWrite" class="arrow arrow-tool" opacity="0"
+          d="M 370 188 C 490 140 560 100 618 92" marker-end="url(#ah-green)"/>
+    <path id="arrClaudeBash"  class="arrow arrow-tool" opacity="0"
+          d="M 370 196 C 490 170 560 145 618 134" marker-end="url(#ah-green)"/>
+    <path id="arrClaudeWeb"   class="arrow arrow-tool" opacity="0"
+          d="M 370 205 C 490 200 560 188 618 176" marker-end="url(#ah-green)"/>
+    <path id="arrClaudeAsk"   class="arrow arrow-tool" opacity="0"
+          d="M 370 212 C 490 220 560 220 618 218" marker-end="url(#ah-green)"/>
+
+    <!-- Stage 1: Claude → MCP (direct) -->
+    <path id="arrClaudeAtlassian" class="arrow arrow-mcp" opacity="0"
+          d="M 370 218 C 490 250 560 265 618 270" marker-end="url(#ah-pink)"/>
+    <path id="arrClaudeGoogle"    class="arrow arrow-mcp" opacity="0"
+          d="M 370 222 C 490 280 560 308 618 312" marker-end="url(#ah-pink)"/>
+    <path id="arrClaudeSlack"     class="arrow arrow-mcp" opacity="0"
+          d="M 370 225 C 490 310 560 348 618 354" marker-end="url(#ah-pink)"/>
+
+    <!-- Stage 2: Claude → Skill /wiki-qa (single, vertically centered) -->
+    <path id="arrClaudeSkillSingle" class="arrow arrow-skill" opacity="0"
+          d="M 370 202 L 426 202" marker-end="url(#ah-yellow)"/>
+    <!-- Stage 2: /wiki-qa → Atlassian (1:1) -->
+    <path id="arrSkillSingleAtlassian" class="arrow arrow-skill-tool" opacity="0"
+          stroke="#f472b6" d="M 546 202 C 580 240 605 260 618 270" marker-end="url(#ah-pink)"/>
+
+    <!-- Stage 3: Claude → each Skill (1:1 mapping) -->
+    <!-- Claude → /wiki-qa (top) -->
+    <path id="arrClaudeSkillWiki"    class="arrow arrow-skill" opacity="0"
+          d="M 370 190 C 395 140 410 112 426 99" marker-end="url(#ah-yellow)"/>
+    <!-- Claude → /email-briefing (middle) -->
+    <path id="arrClaudeSkillEmail"   class="arrow arrow-skill" opacity="0"
+          d="M 370 202 L 426 201" marker-end="url(#ah-yellow)"/>
+    <!-- Claude → /meeting-recap (lower) -->
+    <path id="arrClaudeSkillMeeting" class="arrow arrow-skill" opacity="0"
+          d="M 370 212 C 395 260 410 285 426 303" marker-end="url(#ah-yellow)"/>
+
+    <!-- Stage 3: each Skill → its specific MCP (1:1) -->
+    <!-- /wiki-qa → Atlassian -->
+    <path id="arrSkillWikiAtlassian"  class="arrow arrow-skill-tool" opacity="0"
+          stroke="#f472b6" d="M 546 99 C 590 160 612 240 618 270" marker-end="url(#ah-pink)"/>
+    <!-- /email-briefing → Google -->
+    <path id="arrSkillEmailGoogle"    class="arrow arrow-skill-tool" opacity="0"
+          stroke="#f472b6" d="M 546 201 C 580 255 608 295 618 312" marker-end="url(#ah-pink)"/>
+    <!-- /meeting-recap → Google (Calendar) -->
+    <path id="arrSkillMeetingGoogle"  class="arrow arrow-skill-tool" opacity="0"
+          stroke="#f472b6" d="M 546 303 C 580 310 608 315 618 312" marker-end="url(#ah-pink)"/>
+
+    <!-- Stage 4: Claude → /morning-briefing container left edge (y=170 = container center) -->
+    <path id="arrClaudeOrch" class="arrow arrow-orch" opacity="0"
+          d="M 370 202 C 385 202 396 170 398 170" marker-end="url(#ah-orange)"/>
+
+    <!-- Stage 4 internal: /email-briefing → /meeting-recap (right edge 535 → left edge 595) -->
+    <path id="arrOrchToEmail" class="arrow arrow-orch" opacity="0"
+          d="M 535 163 L 593 163" marker-end="url(#ah-orange)"/>
+
+    <!-- Stage 4 internal: /meeting-recap → /slack-send (right edge 705 → left edge 765) -->
+    <path id="arrOrchToMeeting" class="arrow arrow-orch" opacity="0"
+          d="M 705 163 L 763 163" marker-end="url(#ah-orange)"/>
+
+    <!-- Stage 4: /email-briefing → Gmail MCP (straight down) -->
+    <path id="arrEmailToOutput" class="arrow arrow-mcp" opacity="0"
+          stroke="#f472b6" d="M 480 218 L 480 328" marker-end="url(#ah-pink)"/>
+
+    <!-- Stage 4: /meeting-recap → Calendar MCP (straight down) -->
+    <path id="arrMeetingToOutput" class="arrow arrow-mcp" opacity="0"
+          stroke="#f472b6" d="M 650 218 L 650 328" marker-end="url(#ah-pink)"/>
+
+    <!-- Stage 4: /slack-send → Slack MCP (straight down) -->
+    <path id="arrSlackToOutput" class="arrow arrow-mcp" opacity="0"
+          stroke="#f472b6" d="M 820 218 L 820 328" marker-end="url(#ah-pink)"/>
+
+    <!-- Stage 4: container bottom → WebSearch (curves down-right) -->
+    <path id="arrOrchToWeb" class="arrow arrow-tool" opacity="0"
+          stroke="#34d399" d="M 650 260 C 650 295 940 300 940 328" marker-end="url(#ah-green)"/>
+    <!-- Stage 4: container bottom → Read/Write (curves down-right) -->
+    <path id="arrOrchToRead" class="arrow arrow-tool" opacity="0"
+          stroke="#34d399" d="M 700 260 C 700 295 1045 300 1045 328" marker-end="url(#ah-green)"/>
+
+  </svg>
+
+  <div class="stage-label" id="stageLabel"></div>
+</div>
+
+<div class="message-bar" id="messageBar"></div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="nav-btns">
+  <button class="nav-btn" id="btnPrev">← 이전</button>
+  <button class="nav-btn primary" id="btnNext">다음 →</button>
+</div>
+
+<script>
+// Node visibility groups
+const skillNodes = ["skillSingle","skillEmail","skillMeeting","skillWiki","orchEntry","orchEmail","orchMeeting","orchOutput","orchMcpGmail","orchMcpCalendar","orchMcpSlack","orchToolWeb","orchToolRead"];
+
+// Arrow visibility per stage
+const stages = [
+  // ── 0. As-Is ──
+  {
+    title: "0. As-Is: 지금의 상태",
+    message: "사용자와 Claude Code가 대화합니다. 주변에 도구들이 있지만 어떤 것들인지 아직 흐릿하게만 보입니다.",
+    fog: { fogLayer: 1, fogMcp: 1, fogStage4: 0 },
+    show: [],
+    showArrows: [],
+  },
+  // ── 1. 도구 발견 ──
+  {
+    title: "1. 도구 발견: Native Tools & MCP",
+    message: "안개가 걷힙니다! Claude Code가 직접 사용할 수 있는 도구들이 선명하게 보입니다. MCP로 외부 서비스에도 연결됩니다.",
+    fog: { fogLayer: 0, fogMcp: 0, fogStage4: 0 },
+    show: [],
+    showArrows: [
+      "arrClaudeRead","arrClaudeWrite","arrClaudeBash","arrClaudeWeb","arrClaudeAsk",
+      "arrClaudeAtlassian","arrClaudeGoogle","arrClaudeSlack",
+    ],
+  },
+  // ── 2. 첫 Skill ──
+  {
+    title: "2. 첫 Skill: Skill 하나를 만들어 쓰기",
+    message: "사용자가 /wiki-qa를 실행하면 Claude Code가 Skill 파일을 읽고 Atlassian MCP를 호출합니다. Skill = Claude에게 주는 지시사항 파일.",
+    fog: { fogLayer: 0, fogMcp: 0, fogStage4: 0 },
+    show: ["skillSingle"],
+    showArrows: [
+      "arrClaudeSkillSingle",
+      "arrSkillSingleAtlassian",
+    ],
+  },
+  // ── 3. Skill 확장 ──
+  {
+    title: "3. Skill 확장: 여러 Skill이 쌓인다",
+    message: "Skill이 점점 늘어납니다. 각 Skill은 Claude Code가 읽는 지시사항으로, 명령어 하나로 복잡한 워크플로우가 실행됩니다.",
+    fog: { fogLayer: 0, fogMcp: 0, fogStage4: 0 },
+    show: ["skillEmail","skillMeeting","skillWiki"],
+    showArrows: [
+      "arrClaudeSkillEmail","arrClaudeSkillMeeting","arrClaudeSkillWiki",
+      "arrSkillEmailGoogle","arrSkillMeetingGoogle","arrSkillWikiAtlassian",
+    ],
+  },
+  // ── 4. 오케스트레이션 ──
+  {
+    title: "4. 오케스트레이션: 큰 Skill 안에 작은 Skill들",
+    message: "Skill 오케스트레이션 = 코드 없는 n8n 워크플로우. 자연어 지시만으로 자동화 파이프라인을 만든다.",
+    fog: { fogLayer: 1, fogMcp: 1, fogStage4: 1 },
+    show: ["orchEntry","orchEmail","orchMeeting","orchOutput","orchMcpGmail","orchMcpCalendar","orchMcpSlack","orchToolWeb","orchToolRead"],
+    showArrows: [
+      "arrClaudeOrch",
+      "arrOrchToEmail","arrOrchToMeeting",
+      "arrEmailToOutput","arrMeetingToOutput","arrSlackToOutput",
+      "arrOrchToWeb","arrOrchToRead",
+    ],
+  },
+];
+
+const allArrows = [
+  "arrClaudeRead","arrClaudeWrite","arrClaudeBash","arrClaudeWeb","arrClaudeAsk",
+  "arrClaudeAtlassian","arrClaudeGoogle","arrClaudeSlack",
+  "arrClaudeSkillSingle","arrSkillSingleAtlassian",
+  "arrClaudeSkillWiki","arrClaudeSkillEmail","arrClaudeSkillMeeting",
+  "arrSkillWikiAtlassian","arrSkillEmailGoogle","arrSkillMeetingGoogle",
+  "arrClaudeOrch","arrOrchToEmail","arrOrchToMeeting",
+  "arrEmailToOutput","arrMeetingToOutput","arrSlackToOutput",
+  "arrOrchToWeb","arrOrchToRead",
+];
+
+let current = 0;
+
+function applyStage(idx) {
+  const s = stages[idx];
+
+  document.getElementById("stageLabel").textContent = s.title;
+  document.getElementById("messageBar").textContent = s.message;
+
+  // Fog
+  for (const [id, opacity] of Object.entries(s.fog)) {
+    const el = document.getElementById(id);
+    if (el) el.style.opacity = opacity;
+  }
+
+  // Skill nodes
+  skillNodes.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.opacity = s.show.includes(id) ? "1" : "0";
+  });
+
+  // Arrows
+  allArrows.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.opacity = s.showArrows.includes(id) ? "1" : "0";
+  });
+
+  // Nav buttons
+  document.querySelectorAll(".stage-btn").forEach((btn, i) => {
+    btn.classList.toggle("active", i === idx);
+  });
+
+  document.querySelectorAll(".progress-dot").forEach((dot, i) => {
+    dot.classList.remove("done","current");
+    if (i < idx) dot.classList.add("done");
+    else if (i === idx) dot.classList.add("current");
+  });
+
+  document.getElementById("btnPrev").disabled = idx === 0;
+  document.getElementById("btnNext").disabled = idx === stages.length - 1;
+  document.getElementById("btnNext").textContent =
+    idx === stages.length - 1 ? "완료! 🎉" : "다음 →";
+}
+
+// Build stage nav
+const nav = document.getElementById("stageNav");
+const navLabels = ["0. As-Is","1. 도구 발견","2. 첫 Skill","3. Skill 확장","4. 오케스트레이션"];
+navLabels.forEach((label, i) => {
+  const btn = document.createElement("button");
+  btn.className = "stage-btn";
+  btn.textContent = label;
+  btn.addEventListener("click", () => { current = i; applyStage(i); });
+  nav.appendChild(btn);
+});
+
+// Build progress dots
+const pb = document.getElementById("progressBar");
+stages.forEach(() => {
+  const dot = document.createElement("div");
+  dot.className = "progress-dot";
+  pb.appendChild(dot);
+});
+
+document.getElementById("btnPrev").addEventListener("click", () => {
+  if (current > 0) { current--; applyStage(current); }
+});
+document.getElementById("btnNext").addEventListener("click", () => {
+  if (current < stages.length - 1) { current++; applyStage(current); }
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+    if (current < stages.length - 1) { current++; applyStage(current); }
+  } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+    if (current > 0) { current--; applyStage(current); }
+  }
+});
+
+applyStage(0);
+</script>
+</body>
+</html>
