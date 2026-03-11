@@ -67,15 +67,14 @@ claude-code-camp/
 │   └── skills/
 │       ├── camp-day1/
 │       │   └── SKILL.md             # Day 1 인터랙티브 스킬 / Day 1 interactive skill
-│       └── camp-day2/
-│           ├── SKILL.md             # Day 2 인터랙티브 스킬 / Day 2 interactive skill
-│           ├── journey-diagram.html # 여정 다이어그램 / Journey diagram
-│           ├── orchestration-diagram.html # 오케스트레이션 도식 / Orchestration diagram
-│           └── .claude/skills/      # 공통 스킬 / Shared skills
-│               ├── camp-os-detect/      # OS 자동 감지
-│               ├── camp-lecture-start/  # 강의 시작 루틴
-│               ├── camp-quiz/           # 퀴즈 출제/채점
-│               └── camp-section-transition/ # 섹션 전환
+│       ├── camp-day2/
+│       │   ├── SKILL.md             # Day 2 인터랙티브 스킬 / Day 2 interactive skill
+│       │   ├── journey-diagram.html # 여정 다이어그램 / Journey diagram
+│       │   └── orchestration-diagram.html # 오케스트레이션 도식 / Orchestration diagram
+│       ├── camp-os-detect/          # 공통: OS 자동 감지 / Shared: OS detection
+│       ├── camp-lecture-start/      # 공통: 강의 시작 루틴 / Shared: Lecture start routine
+│       ├── camp-quiz/               # 공통: 퀴즈 출제/채점 / Shared: Quiz pattern
+│       └── camp-section-transition/ # 공통: 섹션 전환 / Shared: Section transition
 └── .gitignore
 ```
 
