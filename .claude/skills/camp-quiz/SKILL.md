@@ -1,5 +1,6 @@
 ---
-description: "Claude Code Camp 강의에서 퀴즈를 출제하고 채점하는 공통 패턴 — AskUserQuestion으로 선택지 제공, 정답 공개, 칭찬/해설"
+name: camp-quiz
+description: "Claude Code Camp 강의에서 퀴즈를 출제하고 채점하는 공통 패턴 — AskUserQuestion으로 선택지 제공, 정답 공개, 칭찬/해설. Use when creating quiz, testing knowledge, or running assessment."
 ---
 
 # camp-quiz: 퀴즈 출제 및 채점 패턴

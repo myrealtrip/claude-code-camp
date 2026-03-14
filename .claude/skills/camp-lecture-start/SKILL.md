@@ -1,5 +1,6 @@
 ---
-description: "Claude Code Camp 강의 시작 시 공통으로 실행하는 루틴 — 인사, OS 감지, 화면 분할 안내, 준비물 확인"
+name: camp-lecture-start
+description: "Claude Code Camp 강의 시작 시 공통으로 실행하는 루틴 — 인사, OS 감지, 화면 분할 안내, 준비물 확인. Use when starting any camp lecture, initializing training session, or preparing new class."
 ---
 
 # camp-lecture-start: 강의 시작 공통 루틴

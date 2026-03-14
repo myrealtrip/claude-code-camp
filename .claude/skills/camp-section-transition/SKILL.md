@@ -1,5 +1,6 @@
 ---
-description: "강의 섹션 완료 시 다음 섹션으로 전환하는 공통 패턴 — 섹션 완료 확인, 남은 시간 표시, 다음 섹션 진행 여부 확인"
+name: camp-section-transition
+description: "강의 섹션 완료 시 다음 섹션으로 전환하는 공통 패턴 — 섹션 완료 확인, 남은 시간 표시, 다음 섹션 진행 여부 확인. Use when transitioning between sections, pacing lecture, or checking progress."
 ---
 
 # camp-section-transition: 섹션 전환 패턴

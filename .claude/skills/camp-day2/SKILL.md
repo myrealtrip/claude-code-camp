@@ -1,5 +1,6 @@
 ---
-description: "Day 2: 나만의 Skill 만들기 — 도구에서 워크플로우까지 - 인터랙티브 강의 진행"
+name: camp-day2
+description: "Day 2: 나만의 Skill 만들기 — 도구에서 워크플로우까지 - 인터랙티브 강의 진행. Use when starting day 2 training, teaching skill creation, or building custom workflows."
 ---
 
 # Day 2: 나만의 Skill 만들기 — 도구에서 워크플로우까지
