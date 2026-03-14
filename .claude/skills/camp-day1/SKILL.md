@@ -1,5 +1,6 @@
 ---
-description: "Day 1: CLAUDE.md와 Memory로 나에게 맞는 Claude Code 세팅하기 - 인터랙티브 강의 진행"
+name: camp-day1
+description: "Day 1: CLAUDE.md와 Memory로 나에게 맞는 Claude Code 세팅하기 - 인터랙티브 강의 진행. Use when starting day 1 training, teaching Claude Code basics, CLAUDE.md setup, or onboarding new users."
 ---
 
 # Day 1: CLAUDE.md와 Memory로 나에게 맞는 Claude Code 세팅하기

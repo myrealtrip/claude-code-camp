@@ -1,5 +1,6 @@
 ---
-description: "강의 중 사용자의 OS를 자동 감지하고, 이후 해당 OS에 맞는 안내를 제공하기 위한 공통 루틴"
+name: camp-os-detect
+description: "강의 중 사용자의 OS를 자동 감지하고, 이후 해당 OS에 맞는 안내를 제공하기 위한 공통 루틴. Use when detecting user OS, providing OS-specific instructions, or at lecture start."
 ---
 
 # camp-os-detect: OS 자동 감지
