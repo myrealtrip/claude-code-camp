@@ -1,0 +1,188 @@
+# Day 3 Beta Tester Personas
+# Day 1 (CLAUDE.md + Memory) / Day 2 (Skill + Tool + Chaining) 이수 가정
+# Day 3 주제: Subagent를 활용한 병렬 작업과 팀 오케스트레이션
+
+personas:
+  - id: persona-1
+    name: 김서연
+    role: 백엔드 개발자 (3년차)
+    team: 숙박 도메인팀
+    age: 28
+    tech_literacy: high
+    claude_code_proficiency: intermediate
+    profile:
+      background: |
+        컴퓨터공학 전공. Spring Boot + Kotlin 기반 숙박 예약 API를 담당하고 있다.
+        Day 1에서 CLAUDE.md에 팀 코딩 컨벤션과 4-Layer 아키텍처 규칙을 꼼꼼히 정리했고,
+        Day 2에서는 Jira 티켓 → 브랜치 생성 → PR 생성을 자동화하는 Skill을 만들었다.
+        터미널과 Git에 익숙하며, 평소에도 CLI 도구를 선호한다.
+      current_pain_points:
+        - 대규모 리팩토링 시 여러 파일을 동시에 수정해야 하는데 하나씩 처리하면 느리다
+        - 코드 리뷰 요청 전 lint, test, security check를 매번 수동으로 돌린다
+        - MSA 환경에서 여러 서비스에 걸친 변경사항의 영향 범위를 파악하기 어렵다
+      day1_result: CLAUDE.md에 Kotlin 코딩 컨벤션, DB 네이밍 규칙, API 스펙 가이드 링크 정리
+      day2_result: /quick-git Skill 완성 (Jira 연동 + 브랜치 + 커밋 + PR 자동화)
+      expectations_for_day3:
+        - 여러 agent가 동시에 다른 파일을 리팩토링하는 방법
+        - CI 파이프라인처럼 lint → test → review를 agent 체인으로 자동화
+        - 이게 진짜 병렬로 도는 건지, 순차 실행과 뭐가 다른지 원리를 알고 싶다
+      personality: |
+        꼼꼼하고 원리를 이해해야 직성이 풀리는 타입. "왜?" 질문을 자주 한다.
+        새로운 기능이 나오면 공식 문서부터 읽는 편. 실습 속도가 빠르지만
+        이해가 안 되면 넘어가지 않고 질문한다.
+      potential_friction:
+        - subagent 간 충돌(같은 파일 동시 수정)에 대한 우려가 클 것
+        - 성능 벤치마크를 요구할 수 있음
+        - 이걸 그냥 쉘 스크립트로 하면 안 되나? 같은 날카로운 질문 예상
+
+  - id: persona-2
+    name: 박지호
+    role: 마케팅 매니저
+    team: 그로스마케팅팀
+    age: 34
+    tech_literacy: low
+    claude_code_proficiency: beginner
+    profile:
+      background: |
+        경영학 전공. 퍼포먼스 마케팅과 CRM 캠페인을 담당하고 있다.
+        Day 1에서 Claude Code 설치에 30분 걸렸고, 터미널 자체가 낯설었다.
+        그래도 CLAUDE.md에 "마케팅 보고서 작성 시 항상 한국어, 표 형식 사용" 같은
+        규칙을 넣는 것에 성공했고, 이것만으로도 큰 성취감을 느꼈다.
+        Day 2에서는 강사의 도움을 받아 간단한 Skill 하나를 만들었다.
+      current_pain_points:
+        - 매주 채널별 성과 데이터를 모아 주간 보고서를 수동으로 만든다
+        - GA, 내부 BI, 광고 플랫폼 등 여러 소스의 데이터를 취합하는 게 반복적
+        - 경쟁사 프로모션 모니터링을 매일 수작업으로 하고 있다
+      day1_result: CLAUDE.md에 보고서 포맷, 선호 언어(한국어), 마케팅 용어 사전 추가
+      day2_result: /weekly-report Skill 초안 (CSV 파일을 읽어 표로 정리하는 수준)
+      expectations_for_day3:
+        - 여러 사이트를 동시에 조사해서 하나의 보고서로 합쳐주는 것
+        - 기술 용어 최소화, 비유와 시각적 설명 선호
+        - 내가 이걸 실무에서 바로 쓸 수 있는 구체적 예시
+      personality: |
+        호기심이 많고 배우려는 의지가 강하지만, 기술 용어에 쉽게 위축된다.
+        "agent", "parallel", "orchestration" 같은 단어를 들으면 멈칫한다.
+        실습 시간에 옆 사람에게 "이거 어떻게 하는 거예요?" 하고 물어보는 편.
+        하지만 한번 이해하면 자기 업무에 적용하는 응용력이 뛰어나다.
+      potential_friction:
+        - subagent라는 개념 자체가 추상적으로 느껴질 수 있음
+        - 터미널에서 여러 agent가 동시에 출력하면 혼란스러워할 가능성
+        - 실습 속도가 느려서 뒤처질 수 있음 → 단계별 체크포인트 필요
+
+  - id: persona-3
+    name: 이준혁
+    role: 시니어 프론트엔드 개발자 (8년차)
+    team: 플랫폼 UX팀
+    age: 36
+    tech_literacy: very_high
+    claude_code_proficiency: advanced
+    profile:
+      background: |
+        React/Next.js 기반 프론트엔드 아키텍처를 리드하고 있다.
+        Day 1 이전부터 Claude Code를 개인적으로 써왔고, CLAUDE.md도 이미 운영 중이었다.
+        Day 1은 복습 느낌이었고, Day 2에서는 디자인 시스템 컴포넌트를 자동 생성하는
+        고급 Skill을 만들어 강사도 감탄했다. Cursor, Copilot 등 AI 코딩 도구 경험이 풍부하다.
+      current_pain_points:
+        - 디자인 시스템 마이그레이션 작업에서 200개+ 컴포넌트를 일괄 수정해야 함
+        - e2e 테스트가 느려서 PR마다 30분씩 기다림 — 병렬화하고 싶다
+        - 코드 리뷰 시 여러 관점(접근성, 성능, 보안)을 동시에 체크하고 싶다
+      day1_result: 기존 CLAUDE.md를 캠프 내용 기반으로 리팩토링, 팀원용 템플릿 제작
+      day2_result: /design-system-migrate Skill (Figma 토큰 → React 컴포넌트 자동 변환)
+      expectations_for_day3:
+        - worktree isolation을 활용한 안전한 병렬 코드 수정
+        - Agent tool의 subagent_type 파라미터별 차이와 최적 사용법
+        - 팀 전체가 쓸 수 있는 multi-agent 워크플로우 설계 패턴
+      personality: |
+        얼리어답터 기질. 새 기능이 나오면 바로 써보고 한계를 테스트하는 타입.
+        강의 중에도 혼자 앞서나가서 응용 실험을 하는 경향이 있다.
+        "이건 이렇게 하면 더 낫지 않나요?" 하고 대안을 제시하기도 한다.
+        초보자를 도와주는 것도 좋아해서 주변 사람 멘토링을 자처한다.
+      potential_friction:
+        - 강의 내용이 너무 기초적이면 지루해할 수 있음
+        - 고급 사용자용 보너스 챌린지가 필요
+        - edge case나 한계점에 대한 질문이 많을 것 (동시 수정 충돌, 토큰 한도 등)
+
+  - id: persona-4
+    name: 최은비
+    role: 데이터 분석가 (2년차)
+    team: 비즈니스 인텔리전스팀
+    age: 26
+    tech_literacy: medium
+    claude_code_proficiency: beginner_to_intermediate
+    profile:
+      background: |
+        통계학 전공. SQL과 Python(pandas, jupyter)은 능숙하지만
+        Git이나 터미널 기반 개발 도구에는 익숙하지 않다.
+        Day 1에서 처음으로 Git을 써봤고, CLAUDE.md에 "SQL 쿼리는 BigQuery 문법으로"
+        같은 규칙을 넣었다. Day 2에서는 CSV → 시각화 리포트 Skill을 만들었는데,
+        MCP 도구 연동 부분에서 한번 막혔다가 해결했다.
+      current_pain_points:
+        - 주간 KPI 대시보드 업데이트가 수작업 (5개 데이터소스에서 추출 → 가공 → 시각화)
+        - A/B 테스트 분석 시 여러 지표를 동시에 검증해야 하는데 순차적으로 하면 오래 걸림
+        - 비개발자라 코드 리뷰를 받기 어렵고, 자기 SQL/Python 코드 품질에 확신이 없다
+      day1_result: CLAUDE.md에 BigQuery SQL 스타일, 분석 리포트 템플릿, 선호 차트 라이브러리 정리
+      day2_result: /kpi-report Skill (BigQuery 쿼리 실행 → pandas 가공 → 차트 생성)
+      expectations_for_day3:
+        - 여러 데이터소스를 동시에 조회해서 합치는 자동화
+        - 하나의 분석을 여러 관점에서 동시에 수행 (예: 코호트별 분석 병렬화)
+        - Python REPL agent와 데이터 검증 agent를 조합하는 실용적 패턴
+      personality: |
+        조용하지만 집중력이 좋다. 실습 시간에 묵묵히 따라하다가
+        갑자기 "이거 이런 식으로도 되나요?" 하고 창의적인 질문을 던진다.
+        데이터로 뭔가를 증명하는 것을 좋아하고, 결과물이 시각적으로 보이면 동기부여가 된다.
+        터미널 명령어는 아직 외우지 못해서 강의 자료를 자주 참고한다.
+      potential_friction:
+        - Git 관련 agent 기능(worktree 등)은 아직 개념이 낯설 수 있음
+        - subagent가 파일을 생성하는 위치나 결과물 확인 방법에 혼란 가능
+        - Jupyter 환경과 CLI 환경의 차이에서 오는 불편함
+
+  - id: persona-5
+    name: 정민수
+    role: 전략기획 파트장 (6년차)
+    team: 경영전략팀
+    age: 38
+    tech_literacy: medium_low
+    claude_code_proficiency: beginner
+    profile:
+      background: |
+        MBA 출신. 사업 전략 수립, 시장 분석, 경영진 보고서 작성이 주 업무.
+        코딩 경험은 없지만, ChatGPT와 Notion AI를 업무에 적극 활용해왔다.
+        Day 1에서 "AI 도구가 또 하나 나왔구나" 하는 반신반의로 시작했지만,
+        CLAUDE.md로 보고서 톤앤매너를 세팅하자 품질이 확 올라가는 것을 보고 인상을 받았다.
+        Day 2에서는 경쟁사 뉴스를 모아 요약하는 Skill을 어렵게 완성했다.
+      current_pain_points:
+        - 분기 전략 보고서 작성 시 시장 조사, 경쟁사 분석, 재무 데이터를 각각 따로 조사
+        - 경영진 회의 준비에 매번 3-4시간 소요 (여러 부서 자료 취합 + 요약)
+        - 신규 사업 검토 시 여러 관점(시장성, 기술 feasibility, 재무)의 동시 분석이 필요
+      day1_result: CLAUDE.md에 보고서 구조(현황→분석→제안), 경영진 선호 용어, 표/차트 포맷 정리
+      day2_result: /competitor-watch Skill (웹 검색 → 뉴스 요약 → Slack 전송)
+      expectations_for_day3:
+        - 여러 명의 AI 전문가에게 동시에 다른 관점으로 분석을 시키는 것
+        - 시장 분석 agent + 재무 분석 agent + 기술 검토 agent가 협업하는 시나리오
+        - 코드 없이도 이해할 수 있는 수준의 설명과 실습
+      personality: |
+        리더십이 있고 의사결정이 빠르다. "이걸로 뭘 할 수 있는지"를 먼저 파악하고
+        세부 구현은 나중에 고민하는 top-down 사고방식.
+        기술 디테일보다는 비즈니스 임팩트에 관심이 많다.
+        "이거 우리 팀 전체가 쓰게 하려면 어떻게 해야 하나?" 같은 확산적 질문을 한다.
+        실습 중 막히면 참을성이 많지는 않아서 빠른 도움이 필요하다.
+      potential_friction:
+        - agent, subagent, orchestration 같은 기술 용어에 대한 진입 장벽
+        - 실습보다 데모/시연을 먼저 보고 싶어할 수 있음
+        - 이걸 내가 직접 안 하고 개발팀에 부탁하면 안 되나? 라는 생각이 들 수 있음
+        - 하지만 가능성을 보면 가장 열정적으로 팀 도입을 추진할 타입
+
+# Literacy Distribution Summary
+# ┌─────────────────────────────────────────────────────────┐
+# │  tech_literacy    : low ── medium_low ── medium ── high ── very_high  │
+# │  persona-2(박지호) ·  persona-5(정민수) · persona-4(최은비) · persona-1(김서연) · persona-3(이준혁)  │
+# │                                                         │
+# │  claude_proficiency: beginner ──────── intermediate ──── advanced     │
+# │  persona-2,5       ·  persona-4       · persona-1       · persona-3  │
+# └─────────────────────────────────────────────────────────┘
+#
+# Role Distribution:
+#   - 개발자 2명 (백엔드 3년차, 프론트엔드 8년차)
+#   - 비개발 3명 (마케터, 데이터분석가, 전략기획)
+#
+# 이 분포를 통해 Day 3 강의가 모든 레벨에서 작동하는지 검증할 수 있음
