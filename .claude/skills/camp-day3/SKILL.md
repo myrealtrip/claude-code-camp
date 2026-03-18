@@ -185,9 +185,9 @@ description: "Day 3: Agent와 병렬 작업 — 나만의 AI 팀 만들기 - 인
 
 ---
 
-### 섹션 2: Agent 만들기 (20분)
+### 섹션 2: Agent 만들기 — 단일 Agent 실행 (20분)
 
-**목표**: Agent tool의 핵심 파라미터를 이해하고, 직접 Agent를 호출하는 Skill을 만든다.
+**목표**: Agent의 핵심 파라미터를 이해하고, Custom Agent를 정의하여 단일 작업을 실행한다.
 
 > 공식 문서: https://code.claude.com/docs/en/sub-agents
 
@@ -220,9 +220,9 @@ description: "Day 3: Agent와 병렬 작업 — 나만의 AI 팀 만들기 - 인
 
 AskUserQuestion으로 "여기까지 Agent의 기본 개념이 이해되셨나요?"를 확인한다.
 
-#### 실습: 채널 분석 Agent Skill 만들기 (13분)
+#### 실습: Custom Agent 만들고 실행하기 (13분)
 
-> **이 실습에서 만든 `channel-faq` Skill을 섹션 3, 섹션 4에서 계속 확장합니다.**
+> **이 실습에서 만든 `channel-analyst` Agent를 섹션 3, 섹션 4에서 계속 활용합니다.**
 
 실습 시작 전에 **`my-first-project` 폴더에서 Claude Code를 실행해주세요**라고 안내한다.
 (OS 감지 결과에 따라 아래 명령어를 안내한다)
@@ -241,85 +241,108 @@ AskUserQuestion으로 실습 난이도를 선택하게 한다:
 - **가이드 모드**: 템플릿을 따라 단계별로 진행합니다
 - **도전 모드**: 목표만 보고 직접 작성해봅니다
 
+##### Agent 정의 파일 만들기
+
+"셰프를 고용하려면 먼저 **채용 공고(Agent 정의 파일)**를 만들어야 합니다. `.claude/agents/` 폴더에 마크다운 파일로 정의합니다."
+
 **[Slack 트랙 — 가이드 모드]**
 
-`/skill-creator`를 입력하라고 안내한다:
+Claude Code에 아래를 입력하라고 안내한다:
 ```
-/skill-creator
+.claude/agents/channel-analyst.md 파일을 만들어줘. 내용은 이렇게:
+
+---
+name: channel-analyst
+description: Slack 채널의 최근 대화를 분석해서 Q&A를 추출하는 Agent
+tools: Slack MCP (slack_read_channel, slack_read_thread)
+model: sonnet
+---
+
+# Channel Analyst Agent
+
+Slack 채널의 최근 대화를 읽고, 질문-답변 패턴을 찾아 정리합니다.
+
+## 작업 절차
+1. 지정된 Slack 채널의 최근 대화를 slack_read_channel로 읽는다
+2. 대화 중 질문(?)과 그에 대한 답변을 식별한다
+3. 스레드가 있으면 slack_read_thread로 전체 맥락을 파악한다
+4. Q&A 쌍을 표 형식으로 정리한다
+
+## 출력 형식
+| # | 질문 | 답변 요약 | 답변자 |
+|---|------|----------|--------|
 ```
-
-Claude가 인터뷰를 시작하면 아래처럼 답하라고 안내한다:
-```
-Slack 채널의 최근 대화를 분석해서 Q&A를 정리해주는 Skill을 만들어줘.
-
-- AskUserQuestion으로 분석할 Slack 채널 이름을 물어봄
-- Slack MCP의 slack_read_channel 도구로 해당 채널의 최근 대화를 읽어옴
-- 대화 중에서 질문과 답변 패턴을 찾아서 정리
-- Q&A 목록을 보기 좋은 표로 출력
-- AskUserQuestion으로 추가 분석할 채널이 있는지 확인
-
-패키징 하지 말고, 현재 디렉토리의 .claude/skills/ 에 바로 만들어줘. 스킬 이름은 channel-faq.
-```
-
-- skill-creator가 `.claude/skills/channel-faq/SKILL.md`를 생성하는 것을 확인
-
-**실습 코드 분석** (가이드 모드에서만):
-- "방금 만든 SKILL.md를 함께 열어봅시다:"
-  ```
-  .claude/skills/channel-faq/SKILL.md 파일 내용을 보여줘
-  ```
-- 생성된 SKILL.md에서 **Agent 호출 부분**을 찾아 함께 읽으며 설명:
-  - "여기서 `Agent tool`을 호출하는 부분이 보이시죠? 이 `prompt`가 셰프에게 주는 지시서입니다."
-  - "어떤 도구(Slack MCP)를 쓰라는 지시가 프롬프트 안에 들어있는 것을 확인하세요."
 
 **[Slack 트랙 — 도전 모드]**
 
-"Slack MCP를 활용해서 특정 채널의 Q&A를 정리하는 Skill을 만들어보세요. 스킬 이름은 `channel-faq`입니다. `/skill-creator`를 사용하세요. 힌트: `slack_read_channel` 도구를 활용하면 됩니다."
+"Slack 채널을 분석해서 Q&A를 추출하는 Agent를 `.claude/agents/channel-analyst.md`에 정의해보세요. Agent가 어떤 도구를 쓰고, 어떤 절차로 작업하고, 어떤 형식으로 결과를 내야 하는지를 마크다운으로 작성하세요."
 
 <!-- FALLBACK: WebSearch -->
 **[WebSearch 트랙 — 가이드 모드]**
 
-`/skill-creator`를 입력하라고 안내한다:
+Claude Code에 아래를 입력하라고 안내한다:
 ```
-/skill-creator
-```
+.claude/agents/topic-researcher.md 파일을 만들어줘. 내용은 이렇게:
 
-Claude가 인터뷰를 시작하면 아래처럼 답하라고 안내한다:
-```
-특정 주제에 대해 웹에서 조사해서 Q&A를 정리해주는 Skill을 만들어줘.
+---
+name: topic-researcher
+description: 특정 주제에 대해 웹에서 조사하여 Q&A를 정리하는 Agent
+tools: WebSearch, WebFetch
+model: sonnet
+---
 
-- AskUserQuestion으로 조사할 주제를 물어봄
-- WebSearch 도구로 해당 주제에 대한 최신 정보를 검색
-- 검색 결과에서 자주 묻는 질문과 답변 패턴을 정리
-- Q&A 목록을 보기 좋은 표로 출력
-- AskUserQuestion으로 추가 조사할 주제가 있는지 확인
+# Topic Researcher Agent
 
-패키징 하지 말고, 현재 디렉토리의 .claude/skills/ 에 바로 만들어줘. 스킬 이름은 channel-faq.
+특정 주제에 대해 웹 검색을 수행하고, 자주 묻는 질문과 답변을 정리합니다.
+
+## 작업 절차
+1. 지정된 주제로 WebSearch를 실행한다
+2. 상위 검색 결과에서 FAQ 패턴을 식별한다
+3. 필요시 WebFetch로 상세 내용을 확인한다
+4. Q&A 쌍을 표 형식으로 정리한다
+
+## 출력 형식
+| # | 질문 | 답변 요약 | 출처 |
+|---|------|----------|------|
 ```
 
 **[WebSearch 트랙 — 도전 모드]**
 
-"WebSearch를 활용해서 특정 주제의 Q&A를 정리하는 Skill을 만들어보세요. 스킬 이름은 `channel-faq`입니다. `/skill-creator`를 사용하세요."
+"특정 주제의 Q&A를 웹에서 조사하는 Agent를 `.claude/agents/topic-researcher.md`에 정의해보세요."
 <!-- /FALLBACK -->
 
-생성된 Skill을 바로 실행한다:
+- 파일이 생성되면 함께 내용을 확인한다
+- **"이것이 '채용 공고'입니다! 이 파일 하나로 Agent의 역할, 도구, 작업 절차가 모두 정의됩니다."**
+
+##### Agent 실행하기
+
+"이제 방금 만든 셰프(Agent)에게 실제로 일을 시켜봅시다!"
+
+**[Slack 트랙]**
+Claude Code에 입력하라고 안내:
 ```
-/channel-faq
+@channel-analyst dev-support 채널의 최근 대화를 분석해서 Q&A를 정리해줘
 ```
 
-- Slack 트랙: 채널 이름을 입력하면 Q&A가 정리되는 것을 확인
-- WebSearch 트랙: 주제를 입력하면 Q&A가 정리되는 것을 확인
-- **"Skill 안에서 Agent가 외부 데이터를 가져와서 분석하는 것을 봤습니다!"**
+**[WebSearch 트랙]**
+```
+@topic-researcher "AI 여행 서비스 트렌드"에 대해 조사해서 Q&A를 정리해줘
+```
+
+- Agent가 실행되어 결과를 반환하는 것을 확인하게 한다
+- **"셰프(Agent)가 지시대로 일을 하고 결과를 가져왔습니다! 이것이 단일 Agent 실행입니다."**
+- (개발자에게) "Agent가 별도 컨텍스트에서 실행되었기 때문에, 메인 대화의 컨텍스트는 깨끗하게 유지됩니다."
+- (비개발자에게) "셰프가 다른 방에서 요리하고, 완성된 요리만 가져온 거예요."
 
 **실습 결과 검증**:
-- "`.claude/skills/channel-faq/SKILL.md` 파일이 생성되었는지 확인해보세요"
-- AskUserQuestion: "SKILL.md 파일이 잘 만들어졌나요?"
-  - 선택지: ["네, 잘 만들어졌어요!", "파일이 안 보여요", "에러가 났어요"]
-  - 안 보이거나 에러 시: 디버깅을 도와주고, 필요하면 가이드 모드 템플릿을 직접 제공한다
+- "`.claude/agents/channel-analyst.md` (또는 `topic-researcher.md`) 파일이 생성되었는지 확인해보세요"
+- AskUserQuestion: "Agent 파일이 만들어지고, 실행 결과도 잘 나왔나요?"
+  - 선택지: ["네, 잘 됐어요!", "파일은 만들어졌는데 실행이 안 돼요", "파일이 안 보여요"]
+  - 문제 시: `.claude/agents/` 경로와 파일명을 확인하고, 필요시 템플릿을 직접 제공한다
 
 #### 퀴즈 (2분)
 
-AskUserQuestion으로 퀴즈를 출제한다:
+`use camp-quiz` 패턴으로 퀴즈를 출제한다:
 
 **Q. Agent의 `model` 파라미터를 `haiku`로 설정하면 어떤 효과가 있나요?**
 - A) Agent가 더 똑똑해진다
@@ -329,11 +352,11 @@ AskUserQuestion으로 퀴즈를 출제한다:
 
 사용자에게 Claude Code를 종료(`/exit`)하라고 안내한다.
 
-AskUserQuestion으로 다음 섹션 진행 여부를 확인한다.
+`use camp-section-transition`
 
 ---
 
-### 섹션 3: 병렬 작업 (20분)
+### 섹션 3: 병렬 작업 — 여러 Agent 동시 실행 (20분)
 
 **목표**: 여러 Agent를 동시에 실행하는 병렬 패턴을 이해하고 직접 체험한다.
 
@@ -372,9 +395,9 @@ AskUserQuestion으로 다음 섹션 진행 여부를 확인한다.
 
 AskUserQuestion으로 "병렬 개념이 이해되셨나요?"를 확인한다.
 
-#### 실습: 병렬 채널 분석 Skill 만들기 (11분)
+#### 실습: 같은 Agent를 여러 개 동시에 실행하기 (11분)
 
-> **프로그레시브 빌딩**: 섹션 2에서 만든 `channel-faq` Skill을 확장합니다.
+> **프로그레시브 빌딩**: 섹션 2에서 만든 `channel-analyst` (또는 `topic-researcher`) Agent를 여러 개 동시에 실행합니다.
 
 Claude Code를 실행하라고 안내한다:
 ```bash
@@ -389,70 +412,52 @@ claude
 ```
 
 AskUserQuestion으로 실습 난이도를 선택하게 한다:
-- **가이드 모드**: 2개 채널 병렬 분석을 템플릿으로 따라합니다
-- **도전 모드**: 4개 채널 병렬 분석을 직접 설계합니다
+- **가이드 모드**: 2개를 동시에 분석합니다
+- **도전 모드**: 4개를 동시에 분석합니다
 
 **[Slack 트랙 — 가이드 모드]**
 
+Claude Code에 아래를 입력하라고 안내한다:
 ```
-/skill-creator
-```
-```
-기존 channel-faq 스킬을 확장해서, 여러 Slack 채널을 동시에 분석하는 Skill을 만들어줘.
-
-- 분석할 채널 목록: dev-support, product-qa (2개 채널)
-- 각 채널에 대해 별도의 Agent를 병렬로 실행해서 Q&A를 수집
-- Agent는 Slack MCP의 slack_read_channel로 채널 대화를 읽고, 질문/답변 패턴을 정리
-- 모든 Agent의 결과를 모아서 채널별 Q&A 요약을 출력
-- 마지막에 AskUserQuestion으로 추가 채널 분석 여부 확인
-
-패키징 하지 말고, 기존 .claude/skills/channel-faq/SKILL.md를 덮어써줘.
+@channel-analyst 에이전트를 2개 동시에 실행해서,
+dev-support 채널과 product-qa 채널을 각각 병렬로 분석해줘.
+두 결과가 다 나오면 채널별로 Q&A를 정리해서 보여줘.
 ```
 
 **[Slack 트랙 — 도전 모드]**
 
-"channel-faq 스킬을 확장해서 dev-support, product-qa, infra-help, design-feedback **4개 채널을 병렬로** 분석하도록 만들어보세요. `/skill-creator`로 기존 SKILL.md를 업데이트하세요."
+"섹션 2에서 만든 `channel-analyst` 에이전트를 **4개 채널**(dev-support, product-qa, infra-help, design-feedback)에 대해 **동시에** 실행해보세요. 프롬프트를 직접 작성해보세요."
 
 <!-- FALLBACK: WebSearch -->
 **[WebSearch 트랙 — 가이드 모드]**
 
+Claude Code에 아래를 입력하라고 안내한다:
 ```
-/skill-creator
-```
-```
-기존 channel-faq 스킬을 확장해서, 여러 주제를 동시에 웹 조사하는 Skill을 만들어줘.
-
-- 조사할 주제 목록: "AI 여행 서비스 트렌드", "원격 근무 도구 추천" (2개 주제)
-- 각 주제에 대해 별도의 Agent를 병렬로 실행해서 Q&A를 수집
-- Agent는 WebSearch로 주제를 검색하고, 자주 묻는 질문/답변을 정리
-- 모든 Agent의 결과를 모아서 주제별 Q&A 요약을 출력
-- 마지막에 AskUserQuestion으로 추가 주제 조사 여부 확인
-
-패키징 하지 말고, 기존 .claude/skills/channel-faq/SKILL.md를 덮어써줘.
+@topic-researcher 에이전트를 2개 동시에 실행해서,
+"AI 여행 서비스 트렌드"와 "원격 근무 도구 추천"을 각각 병렬로 조사해줘.
+두 결과가 다 나오면 주제별로 Q&A를 정리해서 보여줘.
 ```
 
 **[WebSearch 트랙 — 도전 모드]**
 
-"channel-faq 스킬을 확장해서 4개 주제(예: AI 여행 서비스, 원격 근무, 프로젝트 관리, 팀 커뮤니케이션)를 **병렬로** 웹 조사하도록 만들어보세요."
+"`topic-researcher` 에이전트를 **4개 주제**에 대해 동시에 실행해보세요."
 <!-- /FALLBACK -->
 
-실행:
-```
-/channel-faq
-```
-
-- 여러 Agent가 동시에 실행되는 것을 확인하게 한다
-- **"하나씩 순서대로 분석하는 것보다 동시에 돌리니까 훨씬 빠르죠? 이것이 병렬의 힘입니다!"**
+- **실행 중 관찰 포인트**를 안내한다:
+  - "터미널을 보세요 — 여러 Agent가 **동시에** 돌아가고 있는 게 보이시죠?"
+  - "하나씩 순서대로 분석하는 것보다 훨씬 빠릅니다. 이것이 병렬의 힘입니다!"
+  - (개발자에게) "각 Agent가 별도 컨텍스트에서 실행되므로, 서로 간섭하지 않습니다."
+  - (비개발자에게) "셰프 여러 명이 각자 다른 요리를 동시에 하는 것과 같아요."
 
 **실습 결과 검증**:
-- "SKILL.md가 업데이트되었는지 확인해보세요. 파일 안에 `Agent`와 `run_in_background` 같은 병렬 관련 키워드가 들어있어야 합니다."
-- AskUserQuestion: "병렬 분석 Skill이 잘 동작했나요?"
-  - 선택지: ["네, 여러 Agent가 동시에 돌았어요!", "하나씩 순서대로 돌았어요", "에러가 났어요"]
-  - 순차 실행이었거나 에러 시: 원인을 파악하고 Agent 호출 부분을 함께 점검한다
+- AskUserQuestion: "여러 Agent가 동시에 실행되는 것을 확인했나요?"
+  - 선택지: ["네, 동시에 돌았어요!", "하나씩 순서대로 돌았어요", "에러가 났어요"]
+  - 순차 실행 시: "프롬프트에 '동시에', '병렬로'라는 키워드를 명시하면 Claude가 Agent를 병렬로 실행합니다. 다시 시도해보세요."
+  - 에러 시: Agent 파일 경로(`.claude/agents/`)를 확인하고 디버깅 안내
 
 #### 퀴즈 (2분)
 
-AskUserQuestion으로 퀴즈를 출제한다:
+`use camp-quiz` 패턴으로 퀴즈를 출제한다:
 
 **Q. 다음 중 병렬로 실행해야 하는 상황은?**
 - A) 데이터를 수집한 후 → 분석 보고서를 작성
@@ -462,13 +467,13 @@ AskUserQuestion으로 퀴즈를 출제한다:
 
 사용자에게 Claude Code를 종료(`/exit`)하라고 안내한다.
 
-AskUserQuestion으로 다음 섹션 진행 여부를 확인한다.
+`use camp-section-transition`
 
 ---
 
-### 섹션 4: Task Topology — 워크플로 설계 (25분)
+### 섹션 4: Skill로 오케스트레이션 — 병렬 + 순차 워크플로 (25분)
 
-**목표**: 의존성이 있는 multi-agent workflow를 이해하고 Skill로 구현한다.
+**목표**: 병렬 Agent 실행과 순차 후속작업을 하나의 Skill로 묶어 완전한 워크플로를 구현한다.
 
 **진행 순서**:
 
@@ -504,9 +509,9 @@ AskUserQuestion으로 다음 섹션 진행 여부를 확인한다.
 
 AskUserQuestion으로 "워크플로 개념이 이해되셨나요?"를 확인한다.
 
-#### 실습: 워크플로 완성 (15분)
+#### 실습: Skill로 병렬 Agent + 위키 FAQ 작성 (15분)
 
-> **프로그레시브 빌딩**: 섹션 3에서 만든 병렬 분석 Skill을 최종 워크플로로 완성합니다.
+> **프로그레시브 빌딩**: 섹션 2에서 만든 Agent를 섹션 3처럼 병렬로 돌리되, 결과를 모아서 위키에 FAQ를 작성하는 **완전한 워크플로**를 하나의 Skill로 만듭니다.
 
 Claude Code를 실행하라고 안내한다:
 ```bash
@@ -521,93 +526,104 @@ claude
 ```
 
 AskUserQuestion으로 실습 난이도를 선택하게 한다:
-- **가이드 모드**: 수집 → 보고서 2단계 워크플로를 템플릿으로 따라합니다
-- **가이드 챌린지 모드**: 수집 → 분석 → 문서 3단계 구조는 주어지되, 프롬프트는 직접 작성합니다
-- **도전 모드**: 3단계 DAG 워크플로 전체를 자유롭게 설계합니다
+- **가이드 모드**: 2단계 워크플로(수집→위키 작성)를 템플릿으로 따라합니다
+- **가이드 챌린지 모드**: 3단계 구조(수집→분석→위키 작성)는 주어지되, 프롬프트는 직접 작성합니다
+- **도전 모드**: 전체 워크플로를 자유롭게 설계합니다
 
 **[Slack 트랙 — 가이드 모드]**
 
+`/skill-creator`를 입력하라고 안내한다:
 ```
 /skill-creator
 ```
+
+Claude가 인터뷰를 시작하면 아래처럼 답하라고 안내한다:
 ```
-기존 channel-faq 스킬을 확장해서, 채널 수집 결과를 기반으로 FAQ 문서까지 자동 생성하는 Skill을 만들어줘.
+여러 Slack 채널의 Q&A를 병렬로 수집하고, 결과를 모아서 위키(Confluence)에 FAQ 페이지를 작성하는 Skill을 만들어줘. 스킬 이름은 channel-faq.
 
 Step 1 - 수집 (병렬):
-- dev-support, product-qa 채널에 각각 Agent를 병렬로 보내서 Q&A를 수집
-- 각 Agent는 Slack MCP로 채널 대화를 읽고 질문/답변을 정리
+- AskUserQuestion으로 분석할 Slack 채널 목록을 물어봄 (기본값: dev-support, product-qa)
+- 각 채널마다 channel-analyst Agent를 병렬로 실행 (@channel-analyst 사용)
+- 각 Agent는 해당 채널의 Q&A를 추출하여 반환
 
-Step 2 - FAQ 문서 생성 (순차):
-- Step 1의 결과를 모아서, 채널별 FAQ 마크다운 문서를 Write 도구로 생성
-- 파일명: faq-{채널이름}.md
-- 형식: 제목, 날짜, Q&A 목록 (질문 + 답변 + 출처)
+Step 2 - FAQ 위키 작성 (순차):
+- Step 1의 결과를 모아서, 채널별로 정리
+- faq-{채널이름}.md 파일을 Write 도구로 생성
+- Confluence MCP가 있으면 위키에도 페이지를 생성/업데이트 (createConfluencePage 또는 updateConfluencePage 도구 사용)
+- Confluence MCP가 없으면 마크다운 파일 생성만 수행
 
-패키징 하지 말고, 기존 .claude/skills/channel-faq/SKILL.md를 덮어써줘.
+패키징 하지 말고, 현재 디렉토리의 .claude/skills/ 에 바로 만들어줘.
 ```
 
 **[Slack 트랙 — 가이드 챌린지 모드]**
 
-"channel-faq 스킬을 **3단계**로 확장해보세요:
-1. **수집**: 여러 채널을 병렬 Agent로 분석 (섹션 3에서 한 것)
-2. **패턴 분석**: 수집 결과에서 공통 질문 패턴을 추출하는 Agent 추가
-3. **FAQ 생성**: 패턴 분석 결과로 팀별 FAQ 문서 생성
+"channel-faq 스킬을 **3단계**로 설계해보세요:
+1. **수집 (병렬)**: channel-analyst Agent를 여러 채널에 동시 실행
+2. **패턴 분석 (순차)**: 수집 결과에서 공통 질문 패턴을 추출
+3. **위키 작성 (순차)**: 분석 결과로 FAQ 마크다운 + Confluence 위키 페이지 생성
 
 `/skill-creator`로 만들되, 각 단계의 상세 프롬프트는 직접 작성해보세요."
 
 **[Slack 트랙 — 도전 모드]**
 
-"channel-faq 스킬을 4개 채널 + 3단계 DAG 워크플로로 완성해보세요. 수집(병렬) → 분석(순차) → 생성(순차) 구조를 자유롭게 설계하세요."
+"channel-analyst Agent + 병렬 수집 + 위키 FAQ 작성을 조합한 완전한 워크플로 Skill을 자유롭게 설계하세요."
 
 <!-- FALLBACK: WebSearch -->
 **[WebSearch 트랙 — 가이드 모드]**
 
+`/skill-creator`를 입력하라고 안내한다:
 ```
 /skill-creator
 ```
+
+Claude가 인터뷰를 시작하면 아래처럼 답하라고 안내한다:
 ```
-기존 channel-faq 스킬을 확장해서, 웹 조사 결과를 기반으로 FAQ 문서까지 자동 생성하는 Skill을 만들어줘.
+여러 주제의 Q&A를 병렬로 웹 조사하고, 결과를 모아서 FAQ 문서를 작성하는 Skill을 만들어줘. 스킬 이름은 channel-faq.
 
 Step 1 - 조사 (병렬):
-- "AI 여행 서비스 트렌드", "원격 근무 도구 추천" 주제에 각각 Agent를 병렬로 보내서 Q&A를 수집
-- 각 Agent는 WebSearch로 검색하고 자주 묻는 질문/답변을 정리
+- AskUserQuestion으로 조사할 주제 목록을 물어봄 (기본값: "AI 여행 서비스 트렌드", "원격 근무 도구 추천")
+- 각 주제마다 topic-researcher Agent를 병렬로 실행 (@topic-researcher 사용)
+- 각 Agent는 해당 주제의 Q&A를 추출하여 반환
 
-Step 2 - FAQ 문서 생성 (순차):
-- Step 1의 결과를 모아서, 주제별 FAQ 마크다운 문서를 Write 도구로 생성
-- 파일명: faq-{주제}.md
+Step 2 - FAQ 문서 작성 (순차):
+- Step 1의 결과를 모아서, 주제별로 정리
+- faq-{주제}.md 파일을 Write 도구로 생성
 - 형식: 제목, 날짜, Q&A 목록 (질문 + 답변 + 출처 URL)
 
-패키징 하지 말고, 기존 .claude/skills/channel-faq/SKILL.md를 덮어써줘.
+패키징 하지 말고, 현재 디렉토리의 .claude/skills/ 에 바로 만들어줘.
 ```
 
 **[WebSearch 트랙 — 가이드 챌린지 모드]**
 
-"channel-faq 스킬을 3단계로 확장: 수집(병렬 웹 조사) → 패턴 분석(공통 질문 추출) → FAQ 생성(문서 작성). `/skill-creator`로 만들되, 각 단계의 프롬프트는 직접 작성하세요."
+"3단계로 확장: 수집(병렬 웹 조사) → 패턴 분석(공통 질문 추출) → FAQ 문서 생성. `/skill-creator`로 만들되, 각 단계의 프롬프트는 직접 작성하세요."
 
 **[WebSearch 트랙 — 도전 모드]**
 
-"4개 주제 + 3단계 DAG 워크플로를 자유롭게 설계하세요."
+"topic-researcher Agent + 병렬 조사 + FAQ 문서 작성을 조합한 워크플로를 자유롭게 설계하세요."
 <!-- /FALLBACK -->
 
-실행:
+생성된 Skill을 실행한다:
 ```
 /channel-faq
 ```
 
-- 수집이 병렬로 돌아간 후, 순차적으로 문서가 생성되는 것을 확인하게 한다
-- 생성된 FAQ 마크다운 파일을 함께 확인한다
-- **"수집은 병렬로, 분석과 생성은 순차로 — 이것이 Task Topology입니다! 하나의 Skill 안에서 여러 Agent가 순서를 지키며 협업하는 것을 만들었습니다!"**
+- 수집이 병렬로 돌아간 후, 순차적으로 FAQ 문서가 생성되는 것을 확인하게 한다
+- 생성된 FAQ 파일을 함께 확인한다
+- Confluence MCP가 있는 경우 위키에 페이지가 생성된 것도 확인
+- **"수집은 병렬로, 위키 작성은 순차로 — 하나의 Skill 안에서 여러 Agent가 순서를 지키며 협업합니다. 이것이 Agent 오케스트레이션입니다!"**
+- **"Day 2에서 배운 Skill 안에 Day 3에서 배운 Agent를 넣은 거예요. 모든 것이 합쳐집니다!"**
 
 **실습 결과 검증**:
 - "생성된 FAQ 파일을 확인해보세요:"
   - Slack 트랙: `faq-dev-support.md`, `faq-product-qa.md` 파일 존재 여부
   - WebSearch 트랙: `faq-ai-여행-서비스-트렌드.md` 등 주제별 파일 존재 여부
-- AskUserQuestion: "FAQ 마크다운 파일이 생성되었나요?"
+- AskUserQuestion: "FAQ 문서가 잘 생성되었나요?"
   - 선택지: ["네, 파일이 잘 만들어졌어요!", "파일이 없어요", "내용이 비어있어요"]
-  - 문제 시: SKILL.md의 Write 도구 호출 부분과 파일 경로를 함께 점검한다
+  - 문제 시: SKILL.md의 Agent 호출 부분과 Write 도구 호출 부분을 함께 점검한다
 
 #### 퀴즈 (2분)
 
-AskUserQuestion으로 퀴즈를 **하나씩** 출제한다:
+`use camp-quiz` 패턴으로 퀴즈를 **하나씩** 출제한다:
 
 **Q1. 다음 워크플로에서 병렬로 실행할 수 있는 단계는?**
 ```
@@ -620,13 +636,13 @@ C. 합친 데이터로 보고서 작성
 - C) 전부 병렬 가능
 - 정답: **A** — 4개 부서 데이터 수집(A)은 서로 독립적이므로 병렬 가능. 합치기(B)는 수집이 끝나야 하고, 보고서(C)는 합치기가 끝나야 하므로 순차입니다.
 
-**Q2. 섹션 2에서 만든 단일 Agent → 섹션 3 병렬 Agent → 섹션 4 워크플로 완성. 이 과정을 한 단어로 표현하면?**
+**Q2. 섹션 2에서 만든 단일 Agent → 섹션 3 병렬 Agent → 섹션 4 Skill 워크플로. 이 과정을 한 단어로 표현하면?**
 - A) 오케스트레이션
 - B) 리팩토링
 - C) 디버깅
 - 정답: **A** — 여러 Agent를 조율하여 하나의 워크플로를 만드는 것이 오케스트레이션입니다. Day 2에서 Skill 오케스트레이션을 배웠듯이, Day 3에서는 Agent 오케스트레이션을 배운 것입니다!
 
-AskUserQuestion으로 다음 섹션 진행 여부를 확인한다.
+`use camp-section-transition`
 
 ---
 
@@ -641,9 +657,9 @@ AskUserQuestion으로 다음 섹션 진행 여부를 확인한다.
    | 단계 | 비유 | 배운 것 |
    |------|------|---------|
    | 🧠 개념 | 레시피 / 셰프 / 전표 | Skill, Agent, Task 구분 |
-   | 👤 Agent | 셰프 한 명 고용 | Agent tool 파라미터, custom agent |
-   | 👥 병렬 | 여러 셰프 동시에 | 병렬 실행 패턴, 판단 기준 |
-   | 🔄 워크플로 | 주방 운영 시스템 | Task Topology, 의존성 그래프 |
+   | 👤 Agent | 셰프 한 명 고용 | Custom Agent 정의, 단일 실행 |
+   | 👥 병렬 | 여러 셰프 동시에 | 같은 Agent 병렬 실행, 판단 기준 |
+   | 🔄 워크플로 | 주방 운영 시스템 | Skill로 Agent 오케스트레이션 |
 
 2. 3일간의 여정을 보여준다:
    ```
@@ -666,10 +682,10 @@ AskUserQuestion으로 다음 섹션 진행 여부를 확인한다.
    - 정답: **B** — Skill 안에서 여러 Agent를 동시에(병렬로) 실행할 수 있습니다. Agent는 다른 Agent를 만들 수 없고(nesting 불가), Task는 진행 추적 도구로 Agent와는 다른 역할입니다.
 
 4. 다음 단계를 안내한다:
-   - 만든 `channel-faq` Skill을 실제 업무에서 써보기
-   - 다른 채널이나 데이터 소스로 확장해보기
+   - 만든 Agent와 `/channel-faq` Skill을 실제 업무에서 써보기
+   - 자기 업무에 맞는 Custom Agent를 `.claude/agents/`에 추가해보기
    - "어떤 반복 작업을 병렬화할 수 있을까?" 목록 만들어보기
-   - 동료에게 `/channel-faq`를 공유해보기
+   - 동료에게 Agent 파일과 `/channel-faq` Skill을 공유해보기
 
 ---
 
@@ -685,7 +701,7 @@ AskUserQuestion으로 다음 섹션 진행 여부를 확인한다.
   - 섹션 4 끝 (85분 경과) → "남은 시간: 약 5분"
 - **실습 난이도 분기**: 모든 실습에서 AskUserQuestion으로 "가이드 모드 / 도전 모드"를 물어본다. 섹션 4에서는 "가이드 챌린지 모드"도 추가한다.
 - **실습 트랙 분기**: 섹션 0.5에서 결정한 트랙(Slack/WebSearch)을 이후 모든 실습에 일관되게 적용한다. `<!-- FALLBACK: WebSearch -->` 블록은 WebSearch 트랙 전용 내용이다.
-- **프로그레시브 빌딩**: 섹션 2에서 만든 `channel-faq` Skill 파일을 섹션 3, 섹션 4에서 계속 확장한다. 각 섹션의 `/skill-creator` 프롬프트에 "기존 SKILL.md를 덮어써줘"로 안내한다.
+- **프로그레시브 빌딩**: 섹션 2에서 `.claude/agents/`에 Agent 정의 파일을 만들고, 섹션 3에서 같은 Agent를 병렬 실행하고, 섹션 4에서 `/skill-creator`로 Agent를 조합하는 Skill을 만든다. 단일 → 병렬 → 오케스트레이션 순서로 자연스럽게 확장한다.
 - **Claude Code 재시작**: 섹션 2 실습 후, 섹션 3 실습 후 Claude Code를 종료(`/exit`)하라고 안내한다. 이는 context 관리를 위한 것이다.
 - **시간 부족 시**: 남은 시간이 예상보다 적으면, 가이드 모드로 통일하거나 섹션 4를 개념 소개 + 데모로 축소한다. AskUserQuestion으로 진행 방식을 확인한다.
 - **섹션 5 도달 보장**: 섹션 3 완료 시점에서 반드시 남은 시간을 체크한다. 남은 시간이 15분 미만이면 섹션 4를 "개념 설명(5분) + 데모 시연(5분)"으로 축소하고, 반드시 섹션 5 Wrap-up(5분)까지 진행한다. 섹션 4 실습 중이라도 85분 경과 시 실습을 중단하고 "나머지는 강의 후 직접 해보세요"로 마무리한 뒤 섹션 5로 전환한다. **섹션 5 Wrap-up은 절대 생략하지 않는다.**
@@ -694,7 +710,8 @@ AskUserQuestion으로 다음 섹션 진행 여부를 확인한다.
 - 교안에 없는 내용이면 솔직히 말하고, 관련 레퍼런스를 안내하세요.
 - 설명할 때는 비유를 적극 활용하세요. 교안에 있는 비유(레시피/셰프/전표, 식당 주방 등)를 우선 사용하세요.
 - (비개발자인 경우에만) 기술 용어는 항상 비유와 함께 설명하세요.
-- `/skill-creator` 실습에서는 "패키징 하지 말고, 현재 디렉토리에 바로 만들어줘"를 안내하세요.
+- **섹션 2 Agent 생성**: `.claude/agents/` 에 직접 Agent 정의 파일을 만들도록 안내하세요. `/skill-creator`는 섹션 4에서만 사용합니다.
+- `/skill-creator` 실습(섹션 4)에서는 "패키징 하지 말고, 현재 디렉토리에 바로 만들어줘"를 안내하세요.
 - **막힘 시 선제적 대응**: 사용자가 2턴 이상 같은 주제에서 막혀 있으면, 다른 설명 방식으로 전환하세요. 비개발자에게는 비유를 바꾸고, 개발자에게는 코드 예시를 보여주세요. "괜찮습니다, 다른 방식으로 설명해볼게요"라고 먼저 말하세요. 절대 같은 설명을 반복하지 마세요.
 - **에러 발생 시 복구**: `/skill-creator` 실행 중 에러가 발생하면: (1) 에러 메시지를 읽고 원인을 설명, (2) 해결 방법을 구체적으로 안내 (단순히 "다시 시도해보세요"가 아닌), (3) 필요시 수동으로 SKILL.md 템플릿을 직접 제공하여 실습이 멈추지 않도록 하세요.
 - **Task 도구명 정확성**: Task 관련 도구를 언급할 때 반드시 정확한 이름을 사용하세요: `TaskCreate`, `TaskUpdate`, `TaskList`, `TaskGet`. **절대 TodoWrite, TodoRead, Todo 등의 이름을 사용하지 마세요.** 이것은 존재하지 않는 도구입니다.
