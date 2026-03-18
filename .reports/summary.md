@@ -3,65 +3,104 @@
 ## Test Configuration
 - **Personas**: 5
 - **Initial Prompt**: `/camp-day3`
-- **Evaluation Criteria**: `day3/evaluation-criteria.yaml`
-- **Timestamp**: 2026-03-18T20:50 KST
+- **Evaluation Criteria**: `day3/evaluation-criteria.yaml` (3 dimensions, 12 criteria)
+- **Timestamp**: 2026-03-18 20:30~21:00 KST
 
 ## Results Overview
-| Persona | Role | Turns | Score | Status |
-|---------|------|-------|-------|--------|
-| 김서연 | 백엔드 개발자 (3년차) | 14 | 8.07/10 | PASS |
-| 이준혁 | 시니어 FE 개발자 (8년차) | 12 | 8.09/10 | PASS |
-| 정민수 | 전략기획 파트장 (6년차) | — | 7.84/10 | PASS |
-| 박지호 | 마케팅 매니저 | 12 | 7.47/10 | PASS |
-| 최은비 | 데이터 분석가 (2년차) | 7 | 7.19/10 | PASS |
-| **Average** | | | **7.73/10** | |
+
+| Persona | Role | Tech Level | Turns | Score | Status |
+|---------|------|------------|-------|-------|--------|
+| 김서연 | 백엔드 개발자 (3년차) | high / intermediate | 15 | 8.38 | PASS |
+| 박지호 | 마케팅 매니저 | low / beginner | 16 | 7.87 | PASS |
+| 이준혁 | 시니어 FE 개발자 (8년차) | very_high / advanced | 12 | 8.09 | PASS |
+| 최은비 | 데이터 분석가 (2년차) | medium / beginner_to_intermediate | 13 | 8.39 | PASS |
+| 정민수 | 전략기획 파트장 (6년차) | medium_low / beginner | 11 | 7.84 | PASS |
+| **Average** | | | **13.4** | **8.11** | **ALL PASS** |
 
 ## Dimension Averages (across all personas)
-| Dimension | Weight | Average Score |
-|-----------|--------|---------------|
-| 학습자 경험 | 0.40 | 8.04/10 |
-| 교육 목표 달성 | 0.35 | 7.64/10 |
-| 기술적 품질 | 0.25 | 7.36/10 |
+
+| Dimension | Weight | Avg Score | Weighted Avg |
+|-----------|--------|-----------|--------------|
+| 학습자 경험 | 0.40 | 8.32/10 | 3.33 |
+| 교육 목표 달성 | 0.35 | 8.12/10 | 2.84 |
+| 기술적 품질 | 0.25 | 7.74/10 | 1.94 |
+| **Total** | | | **8.11/10** |
+
+## Criteria Heatmap
+
+| Criterion | 김서연 | 박지호 | 이준혁 | 최은비 | 정민수 | Avg |
+|-----------|--------|--------|--------|--------|--------|-----|
+| 학습 내용 미리보기 | 9 | 8 | 9 | 9 | 9 | **8.8** |
+| 난이도 적절성 | 9 | 8 | 8 | 9 | 9 | **8.6** |
+| 흐름과 페이싱 | 8 | 7 | 8 | 8 | 7 | **7.6** |
+| 상호작용 품질 | 9 | 9 | 8 | 9 | 8 | **8.6** |
+| 실무 연관성 | 8 | 8 | 9 | 9 | 8 | **8.4** |
+| 막힘 시 대응 | 8 | 8 | 7 | 8 | 8 | **7.8** |
+| Agent/Task/Skill 구분 | 9 | 8 | 8 | 9 | 8 | **8.4** |
+| 학습 목표 달성도 | 8 | 8 | 9 | 8 | 7 | **8.0** |
+| 퀴즈 품질 | 9 | 8 | 8 | 8 | 8 | **8.2** |
+| 실습 효과 | 8 | 7 | 8 | 8 | 7 | **7.6** |
+| 에러 처리 | 7.5 | 7 | 7 | 8 | 7 | **7.3** |
+| 프롬프트 품질 | 8.5 | 8 | 8 | 8 | 8 | **8.1** |
 
 ## Key Findings
 
-### Strongest Area: 학습자 경험 (8.04/10)
-- 페르소나별 난이도 적응이 우수 (개발자에게 기술 비유, 비개발자에게 일상 비유)
-- Progressive building 패턴 (단일 Agent → 병렬 → 워크플로우) 일관 적용
-- 퀴즈 배치와 섹션 전환이 자연스러움
+### Strongest Areas (Avg >= 8.5)
+- **학습 내용 미리보기** (8.8): 4-Stage 여정 다이어그램과 로드맵이 모든 페르소나에게 효과적
+- **난이도 적절성** (8.6): 페르소나별 맞춤 비유가 일관적 (Java thread pool, 셰프/레시피, 전략팀 업무)
+- **상호작용 품질** (8.6): 텍스트 기반 질문/선택지가 명확하고 사용자 응답에 적응적
 
-### Weakest Area: 기술적 품질 (7.36/10)
-- **AskUserQuestion 도구 오버라이드 실패**: 5개 페르소나 전원에서 `--append-system-prompt`의 "AskUserQuestion 금지" 지시가 SKILL.md 내부 지시를 오버라이드하지 못함. 매 턴마다 세션이 중단되어 `--resume`이 필요했음
-- Task 개념이 TodoWrite로 잘못 설명되거나 hands-on 실습이 부족
-- journey-diagram.html 브라우저 오픈 단계 누락 (Section 0)
+### Weakest Areas (Avg < 8.0)
+- **에러 처리** (7.3): AskUserQuestion 도구 반복 사용 시도 (특히 박지호 세션에서 3회 중단), journey-diagram.html 누락
+- **흐름과 페이싱** (7.6): 섹션 전환 시 남은 시간 안내 누락, 섹션 5 Wrap-up 미도달 사례
+- **실습 효과** (7.6): 실습 결과 검증 단계 부족, beginner 페르소나의 실습 건너뛰기 발생
 
-### Cross-Persona Insights
-1. **고급 사용자(이준혁, 김서연)**: Agent Teams, worktree isolation 등 고급 토픽에 대한 깊이 있는 설명이 잘 작동. 날카로운 질문(쉘 스크립트 대비 장점, 동시 수정 충돌)에도 적절히 대응
-2. **중급 사용자(최은비)**: 데이터 분석가 관점의 비유와 copy-paste 가이드가 효과적이었으나, Git/worktree 개념 설명이 다소 부족
-3. **초급 사용자(박지호, 정민수)**: 비유(요리사/레시피/주문서)를 통한 추상 개념 전달이 효과적. 다만 실습 속도와 wrap-up 섹션 도달에 어려움
+### Cross-Persona Patterns
 
-## Critical Issues & Recommendations
+1. **AskUserQuestion 문제 (다수 페르소나)**
+   - `--append-system-prompt`의 "AskUserQuestion 금지" 지시만으로는 불충분
+   - `--disallowedTools AskUserQuestion`이 필수적
+   - 박지호 세션에서 3회 세션 중단 발생
 
-### P0: AskUserQuestion Override Failure
-- **문제**: SKILL.md의 AskUserQuestion 호출 지시가 `--append-system-prompt`의 금지 지시보다 우선
-- **영향**: 모든 페르소나에서 세션 중단 발생 (persona-2는 11/12턴에서 발생)
-- **권장**: SKILL.md에 조건부 질문 전달 로직 추가 또는 camp-quiz 패턴에 텍스트 기반 fallback 구현
+2. **Task 개념 심화 부족 (4/5 페르소나 지적)**
+   - TaskCreate/TaskUpdate의 구체적 사용법이 모든 세션에서 얇게 다뤄짐
+   - Agent, Skill에 비해 실습 기회가 없음
 
-### P1: Task Concept Accuracy
-- **문제**: Task를 TodoWrite로 설명하거나 TaskCreate/TaskUpdate 실습이 누락
-- **권장**: SKILL.md에 Task 관련 정확한 도구명(TaskCreate, TaskUpdate, TaskList)과 실습 단계 명시
+3. **journey-diagram.html 누락 (5/5 페르소나)**
+   - 섹션 0의 여정 다이어그램 브라우저 오픈 단계가 전혀 실행되지 않음
 
-### P2: Section 0 Journey Diagram
-- **문제**: journey-diagram.html 브라우저 오픈 단계가 실행되지 않음
-- **권장**: Section 0 시작 시 다이어그램 오픈 로직 검증
+4. **섹션 5 Wrap-up 불안정 (2/5 페르소나)**
+   - 정민수, 이준혁 세션에서 완전한 Wrap-up 미도달 또는 축약
 
-### P3: Wrap-up Section Coverage
-- **문제**: multi-turn 세션에서 Section 5(Wrap-up)에 도달하지 못하는 경우 발생
-- **권장**: 시간/턴 예산 관리 로직 강화
+5. **프로그레시브 빌딩 성공 (5/5 페르소나)**
+   - channel-faq를 단일 Agent -> 병렬 -> 워크플로로 확장하는 구조가 모든 세션에서 일관적으로 작동
+
+6. **페르소나 맞춤 비유 우수 (5/5 페르소나)**
+   - 김서연: Java CompletableFuture, Spring Batch
+   - 박지호: 인턴/대리/부장, 마케팅 성과 데이터
+   - 이준혁: 토큰 관점 컨텍스트, worktree isolation
+   - 최은비: A/B 테스트, KPI 대시보드, 코호트 분석
+   - 정민수: 경영진 보고서, 부서별 자료 취합
+
+## Recommendations for SKILL.md Improvement
+
+### P0 (Must Fix)
+1. **AskUserQuestion 강제 차단**: `--disallowedTools AskUserQuestion` 플래그를 SKILL.md의 시스템 프롬프트에 명시적으로 추가
+2. **journey-diagram.html 실행**: 섹션 0 지시문에 `open journey-diagram.html` 명령어를 구체적으로 포함
+
+### P1 (Should Fix)
+3. **Task 개념 실습 추가**: TaskCreate/TaskUpdate를 사용하는 간단한 실습 단계를 섹션 1 또는 4에 추가
+4. **섹션 5 도달 보장**: 시간 관리 로직을 강화하여 Wrap-up까지 반드시 진행하도록 설계
+5. **실습 결과 검증**: 각 실습 후 "이런 파일이 생성되어야 합니다" 기대 결과 안내 추가
+
+### P2 (Nice to Have)
+6. **Advanced 사용자용 보너스 퀴즈**: open-ended 설계 문제나 edge case 시나리오 추가
+7. **Agent Teams 심화**: 고급 사용자 트랙에 Agent Teams 실습 포함
+8. **남은 시간 안내 일관성**: 매 섹션 전환 시 남은 시간을 반드시 표시하도록 transition 패턴 강화
 
 ## Individual Reports
-- [report-persona-1.md](./report-persona-1.md) — 김서연 (8.07/10)
-- [report-persona-2.md](./report-persona-2.md) — 박지호 (7.47/10)
+- [report-persona-1.md](./report-persona-1.md) — 김서연 (8.38/10)
+- [report-persona-2.md](./report-persona-2.md) — 박지호 (7.87/10)
 - [report-persona-3.md](./report-persona-3.md) — 이준혁 (8.09/10)
-- [report-persona-4.md](./report-persona-4.md) — 최은비 (7.19/10)
+- [report-persona-4.md](./report-persona-4.md) — 최은비 (8.39/10)
 - [report-persona-5.md](./report-persona-5.md) — 정민수 (7.84/10)
