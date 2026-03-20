@@ -5,76 +5,145 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Code Camp Day 3 — 오늘의 여정</title>
 <style>
+  :root {
+    /* === Canvas & Background === */
+    --bg-body:        #0a0e1a;
+    --bg-canvas:      #111827;
+    --bg-canvas-alt:  #0d1117;
+    --border-canvas:  #1e2d45;
+
+    /* === Brand / Orchestration (Purple) === */
+    --color-purple:       #a78bfa;
+    --color-purple-dim:   #7c3aed;
+    --color-purple-bg:    #1e1b2e;
+    --color-purple-glow:  rgba(167, 139, 250, 0.35);
+
+    /* === Agent (Blue) === */
+    --color-blue:       #60a5fa;
+    --color-blue-dim:   #2563eb;
+    --color-blue-bg:    #0f1e35;
+    --color-blue-glow:  rgba(96, 165, 250, 0.30);
+
+    /* === MCP (Pink) === */
+    --color-pink:       #f472b6;
+    --color-pink-bg:    #1e0f25;
+
+    /* === Tool / Generate (Emerald) === */
+    --color-green:      #34d399;
+    --color-green-bg:   #0a2018;
+
+    /* === Skill (Amber) === */
+    --color-amber:      #fbbf24;
+    --color-amber-bg:   #1e1708;
+
+    /* === Task (Lime) === */
+    --color-lime:       #86efac;
+    --color-lime-bg:    #0a1f0e;
+
+    /* === User node (Sky) === */
+    --color-sky:        #38bdf8;
+
+    /* === Text === */
+    --text-primary:     #e2e8f0;
+    --text-secondary:   #94a3b8;
+    --text-muted:       #64748b;
+    --text-dim:         #334155;
+
+    /* === UI Chrome === */
+    --border-default:   #1e293b;
+    --border-active:    #334155;
+
+    /* === Typography Scale === */
+    --font-xs:    11px;
+    --font-sm:    13px;
+    --font-md:    15px;
+    --font-lg:    18px;
+    --font-xl:    22px;
+    --font-h1:    2rem;
+
+    /* === Spacing === */
+    --space-xs:   8px;
+    --space-sm:   12px;
+    --space-md:   20px;
+    --space-lg:   28px;
+    --space-xl:   36px;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #0f1117;
-    color: #e2e8f0;
+    font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-body);
+    color: var(--text-primary);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 32px 24px;
   }
 
   h1 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #a78bfa;
-    margin-bottom: 6px;
+    font-size: var(--font-h1);
+    font-weight: 800;
+    color: var(--color-purple);
+    margin-bottom: 10px;
     text-align: center;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
   }
 
   .subtitle {
-    font-size: 0.85rem;
-    color: #64748b;
-    margin-bottom: 28px;
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xl);
     text-align: center;
+    font-weight: 500;
   }
 
   .stage-nav {
     display: flex;
-    gap: 8px;
-    margin-bottom: 28px;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-lg);
     flex-wrap: wrap;
     justify-content: center;
   }
 
   .stage-btn {
-    padding: 6px 14px;
+    padding: 7px 16px;
     border-radius: 20px;
-    border: 1.5px solid #334155;
+    border: 1.5px solid var(--border-active);
     background: transparent;
-    color: #94a3b8;
-    font-size: 0.78rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .stage-btn:hover {
-    border-color: #a78bfa;
-    color: #a78bfa;
+    border-color: var(--color-purple);
+    color: var(--color-purple);
+    background: rgba(167, 139, 250, 0.06);
   }
 
   .stage-btn.active {
-    background: #a78bfa;
-    border-color: #a78bfa;
-    color: #0f1117;
+    background: var(--color-purple);
+    border-color: var(--color-purple);
+    color: var(--bg-body);
+    box-shadow: 0 0 12px var(--color-purple-glow);
   }
 
   .canvas-wrap {
     position: relative;
-    width: 1100px;
+    width: 1200px;
     max-width: 100%;
-    height: 560px;
-    background: #161b27;
-    border-radius: 16px;
-    border: 1.5px solid #1e293b;
+    height: 640px;
+    background: var(--bg-canvas);
+    border-radius: 20px;
+    border: 1.5px solid var(--border-canvas);
     overflow: hidden;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(167, 139, 250, 0.05);
   }
 
   svg {
@@ -84,178 +153,247 @@
   }
 
   .node {
-    transition: opacity 0.5s;
+    transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+    cursor: default;
   }
 
   .node-claude rect {
-    fill: #1e293b;
-    stroke: #a78bfa;
+    fill: #1c1f3a;
+    stroke: var(--color-purple);
     stroke-width: 2.5;
   }
 
   .node-tool rect {
-    fill: #0f2420;
-    stroke: #34d399;
+    fill: var(--color-green-bg);
+    stroke: var(--color-green);
     stroke-width: 1.5;
   }
 
   .node-mcp rect {
-    fill: #1a1a2e;
-    stroke: #f472b6;
+    fill: var(--color-pink-bg);
+    stroke: var(--color-pink);
     stroke-width: 1.5;
   }
 
   .node-skill rect {
-    fill: #1e1a0e;
-    stroke: #fbbf24;
+    fill: #251e08;
+    stroke: var(--color-amber);
     stroke-width: 1.5;
   }
 
   .node-agent rect {
-    fill: #0f1e2e;
-    stroke: #60a5fa;
+    fill: #0d1e3d;
+    stroke: var(--color-blue);
     stroke-width: 1.5;
   }
 
   .node-task rect {
-    fill: #0f1a0a;
-    stroke: #a3e635;
+    fill: var(--color-lime-bg);
+    stroke: var(--color-lime);
     stroke-width: 1.5;
   }
 
   .node-merge rect {
-    fill: #1e293b;
-    stroke: #a78bfa;
-    stroke-width: 1.5;
-    stroke-dasharray: 4 2;
+    fill: #1c1f3a;
+    stroke: var(--color-purple);
+    stroke-width: 2.0;
+    stroke-dasharray: 6 3;
   }
 
   .node-analyze rect {
-    fill: #1e1a0e;
-    stroke: #fbbf24;
+    fill: #251e08;
+    stroke: var(--color-amber);
     stroke-width: 1.5;
   }
 
   .node-generate rect {
-    fill: #0f2420;
-    stroke: #34d399;
+    fill: var(--color-green-bg);
+    stroke: var(--color-green);
     stroke-width: 1.5;
   }
 
   .node-label {
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
     text-anchor: middle;
     dominant-baseline: middle;
-    fill: #e2e8f0;
+    fill: var(--text-primary);
     pointer-events: none;
   }
 
   .node-sublabel {
-    font-size: 9px;
+    font-size: 13px;
     text-anchor: middle;
     dominant-baseline: middle;
-    fill: #64748b;
+    fill: var(--text-secondary);
     pointer-events: none;
   }
 
   .arrow {
-    transition: opacity 0.5s;
+    transition: opacity 0.4s ease;
     fill: none;
-    stroke-width: 1.8;
+    stroke-width: 2.5;
   }
 
-  .arrow-main        { stroke: #a78bfa; }
-  .arrow-tool        { stroke: #34d399; stroke-dasharray: 4 3; }
-  .arrow-mcp         { stroke: #f472b6; stroke-dasharray: 4 3; }
-  .arrow-skill       { stroke: #fbbf24; }
-  .arrow-agent       { stroke: #60a5fa; }
-  .arrow-orch        { stroke: #a78bfa; stroke-width: 2.2; }
-  .arrow-task        { stroke: #a3e635; stroke-dasharray: 3 2; stroke-width: 1.5; }
-  .arrow-wf-analyze  { stroke: #fbbf24; stroke-width: 2.0; }
-  .arrow-wf-generate { stroke: #34d399; stroke-width: 2.2; }
-  .arrow-wf-entry    { stroke: #fb923c; stroke-width: 2.2; }
+  @keyframes dashFlow {
+    to { stroke-dashoffset: -20; }
+  }
+
+  .arrow.animated {
+    animation: dashFlow 1.2s linear infinite;
+  }
+
+  .arrow-main        { stroke: var(--color-purple); }
+  .arrow-tool        { stroke: var(--color-green); stroke-dasharray: 6 4; }
+  .arrow-mcp         { stroke: var(--color-pink); stroke-dasharray: 6 4; }
+  .arrow-skill       { stroke: var(--color-amber); }
+  .arrow-agent       { stroke: var(--color-blue); }
+  .arrow-orch        { stroke: var(--color-purple); stroke-width: 2.8; }
+  .arrow-task        { stroke: var(--color-lime); stroke-dasharray: 5 3; stroke-width: 2.2; }
+  .arrow-wf-analyze  { stroke: var(--color-amber); stroke-width: 2.5; }
+  .arrow-wf-generate { stroke: var(--color-green); stroke-width: 2.8; stroke-dasharray: 8 4; }
+  .arrow-wf-entry    { stroke: #fb923c; stroke-width: 2.8; }
 
   .stage-label {
     position: absolute;
-    bottom: 14px;
+    bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 0.76rem;
-    color: #475569;
-    background: #0f1117;
-    padding: 4px 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    background: rgba(10, 14, 26, 0.85);
+    padding: 5px 14px;
     border-radius: 12px;
-    border: 1px solid #1e293b;
+    border: 1px solid var(--border-default);
     white-space: nowrap;
     pointer-events: none;
+    backdrop-filter: blur(4px);
   }
 
   .message-bar {
-    margin-top: 20px;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #1e1a2e, #1a1a2e);
-    border: 1.5px solid #4c1d95;
-    border-radius: 12px;
-    font-size: 0.88rem;
+    margin-top: 24px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg,
+      rgba(30, 27, 46, 0.95) 0%,
+      rgba(15, 20, 40, 0.95) 100%
+    );
+    border: 1.5px solid rgba(167, 139, 250, 0.35);
+    border-radius: 14px;
+    font-size: 1.05rem;
+    font-weight: 500;
     color: #c4b5fd;
     text-align: center;
-    max-width: 1100px;
+    max-width: 1200px;
     width: 100%;
-    min-height: 44px;
+    min-height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
+    line-height: 1.6;
+    box-shadow:
+      0 0 0 1px rgba(167, 139, 250, 0.1),
+      0 8px 24px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
   }
 
   .progress-bar {
-    display: flex;
-    gap: 6px;
-    margin-top: 16px;
-    align-items: center;
-  }
-
-  .progress-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
+    width: 100%;
+    max-width: 400px;
+    height: 4px;
     background: #334155;
-    transition: background 0.3s;
+    border-radius: 2px;
+    position: relative;
+    margin-top: 20px;
+    overflow: hidden;
   }
 
-  .progress-dot.done    { background: #a78bfa; }
-  .progress-dot.current { background: #a78bfa; box-shadow: 0 0 6px #a78bfa; }
+  .progress-fill {
+    height: 100%;
+    background: var(--color-purple);
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 8px var(--color-purple-glow);
+  }
 
   .nav-btns {
     display: flex;
-    gap: 12px;
-    margin-top: 20px;
+    gap: var(--space-sm);
+    margin-top: 24px;
+    margin-bottom: 32px;
+    align-items: center;
   }
 
   .nav-btn {
-    padding: 8px 22px;
-    border-radius: 8px;
-    border: 1.5px solid #334155;
+    padding: 11px 28px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border-active);
     background: transparent;
-    color: #94a3b8;
-    font-size: 0.82rem;
-    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    letter-spacing: 0.01em;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .nav-btn:hover:not(:disabled) { border-color: #a78bfa; color: #a78bfa; }
+  .nav-btn:hover:not(:disabled) {
+    border-color: var(--color-purple);
+    color: var(--color-purple);
+    background: rgba(167, 139, 250, 0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(167, 139, 250, 0.15);
+  }
+
   .nav-btn:disabled { opacity: 0.3; cursor: default; }
 
   .nav-btn.primary {
-    background: #a78bfa;
-    border-color: #a78bfa;
-    color: #0f1117;
+    background: var(--color-purple);
+    border-color: var(--color-purple);
+    color: var(--bg-body);
+    box-shadow: 0 0 16px var(--color-purple-glow);
   }
 
   .nav-btn.primary:hover:not(:disabled) {
     background: #8b5cf6;
     border-color: #8b5cf6;
+    box-shadow: 0 0 24px rgba(139, 92, 246, 0.5);
+    transform: translateY(-1px);
     color: #fff;
+  }
+
+  /* Progress bar dot indicators */
+  .progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border-active);
+    position: absolute;
+    top: -3px;
+    transform: translateX(-50%);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+  }
+  .progress-dot.reached {
+    background: var(--color-purple-dim);
+  }
+  .progress-dot.active {
+    background: var(--color-purple);
+    box-shadow: 0 0 6px var(--color-purple-glow);
+  }
+
+  /* Fog fade transition */
+  #fogConceptNodes {
+    transition: opacity 0.4s ease;
+  }
+
+  /* Responsive */
+  @media (max-width: 800px) {
+    .canvas-wrap { height: 480px; }
+    .message-bar { font-size: 0.9rem; padding: 10px 16px; }
+    .nav-btn { padding: 9px 18px; font-size: 0.85rem; }
+    body { padding: 16px 12px; }
   }
 </style>
 </head>
@@ -267,67 +405,109 @@
 <div class="stage-nav" id="stageNav"></div>
 
 <div class="canvas-wrap">
-  <svg id="diagram" viewBox="0 0 1100 560" xmlns="http://www.w3.org/2000/svg">
+  <svg id="diagram" viewBox="0 0 1200 640" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <!-- Arrow markers -->
-      <marker id="ah-purple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-        <polygon points="0 0,8 3,0 6" fill="#a78bfa"/>
+      <!-- Arrow markers — larger arrowheads -->
+      <marker id="ah-purple" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0,10 4,0 8" fill="#a78bfa"/>
       </marker>
-      <marker id="ah-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-        <polygon points="0 0,8 3,0 6" fill="#34d399"/>
+      <marker id="ah-green" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0,10 4,0 8" fill="#34d399"/>
       </marker>
-      <marker id="ah-pink" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-        <polygon points="0 0,8 3,0 6" fill="#f472b6"/>
+      <marker id="ah-pink" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0,10 4,0 8" fill="#f472b6"/>
       </marker>
-      <marker id="ah-yellow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-        <polygon points="0 0,8 3,0 6" fill="#fbbf24"/>
+      <marker id="ah-yellow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0,10 4,0 8" fill="#fbbf24"/>
       </marker>
-      <marker id="ah-orange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-        <polygon points="0 0,8 3,0 6" fill="#fb923c"/>
+      <marker id="ah-orange" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0,10 4,0 8" fill="#fb923c"/>
       </marker>
-      <marker id="ah-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-        <polygon points="0 0,8 3,0 6" fill="#60a5fa"/>
+      <marker id="ah-blue" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0,10 4,0 8" fill="#60a5fa"/>
       </marker>
-      <marker id="ah-lime" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-        <polygon points="0 0,8 3,0 6" fill="#a3e635"/>
+      <marker id="ah-lime" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0,10 4,0 8" fill="#86efac"/>
       </marker>
 
-      <!-- Glow filters -->
-      <filter id="glow-purple">
-        <feGaussianBlur stdDeviation="3" result="b"/>
-        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      <!-- Enhanced glow filters -->
+      <filter id="glow-purple" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+        <feColorMatrix in="blur" type="matrix"
+          values="1 0 0 0 0.65
+                  0 0 0 0 0.54
+                  0 0 0 0 0.98
+                  0 0 0 0.8 0" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
       </filter>
-      <filter id="glow-orange">
-        <feGaussianBlur stdDeviation="3" result="b"/>
-        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+
+      <filter id="glow-orange" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+        <feColorMatrix in="blur" type="matrix"
+          values="1 0 0 0 0.98
+                  0 0 0 0 0.57
+                  0 0 0 0 0.24
+                  0 0 0 0.7 0" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
       </filter>
-      <filter id="glow-blue">
-        <feGaussianBlur stdDeviation="3" result="b"/>
-        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+
+      <filter id="glow-blue" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+        <feColorMatrix in="blur" type="matrix"
+          values="0 0 0 0 0.37
+                  0 0 0 0 0.64
+                  0 0 0 0 0.98
+                  0 0 0 0.7 0" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
       </filter>
+
+      <!-- Dot grid background -->
+      <pattern id="dotGrid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="10" cy="10" r="0.8" fill="#334155" opacity="0.4"/>
+      </pattern>
 
       <!-- Dot grid pattern for Stage 3 container -->
       <pattern id="dotGridPurple" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
         <circle cx="8" cy="8" r="1" fill="#a78bfa" opacity="0.35"/>
       </pattern>
+
+      <!-- Gradient for Stage 3 container header -->
+      <linearGradient id="headerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.25"/>
+        <stop offset="50%" stop-color="#60a5fa" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.05"/>
+      </linearGradient>
+
+      <!-- Container border gradient -->
+      <linearGradient id="containerBorderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.8"/>
+        <stop offset="50%" stop-color="#60a5fa" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.8"/>
+      </linearGradient>
     </defs>
 
-    <!-- ══════════════════════════════════
-         PERSON (always visible, cx=70 cy=280)
-    ══════════════════════════════════ -->
-    <g id="nodePerson">
-      <circle cx="70" cy="280" r="22" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
-      <text x="70" y="285" text-anchor="middle" font-size="22">🧑</text>
-      <text x="70" y="313" class="node-label" fill="#38bdf8">사용자</text>
-    </g>
+    <!-- Canvas dot grid background -->
+    <rect width="1200" height="640" fill="url(#dotGrid)" opacity="1"/>
 
     <!-- ══════════════════════════════════
-         CLAUDE CODE (always visible, x=220 y=255 w=130 h=54)
+         PERSON (always visible, cx=70 cy=300)
     ══════════════════════════════════ -->
-    <g id="nodeClaude" class="node node-claude" filter="url(#glow-purple)">
-      <rect x="220" y="255" width="130" height="54" rx="10" fill="#1e293b" stroke="#a78bfa" stroke-width="2.5"/>
-      <text x="285" y="277" class="node-label" fill="#a78bfa" font-size="13">Claude Code</text>
-      <text x="285" y="295" class="node-sublabel">AI 에이전트</text>
+    <g id="nodePerson">
+      <circle cx="70" cy="300" r="26" fill="#0d1a28" stroke="#38bdf8" stroke-width="2.5"/>
+      <!-- Head -->
+      <circle cx="70" cy="290" r="9" fill="#38bdf8" fill-opacity="0.9"/>
+      <!-- Body arc -->
+      <path d="M52 320 Q70 305 88 320" fill="#38bdf8" fill-opacity="0.9"/>
+      <text x="70" y="340" class="node-label" fill="#38bdf8" font-size="14">사용자</text>
     </g>
 
     <!-- ══════════════════════════════════
@@ -336,289 +516,328 @@
 
     <!-- Fog layer (fades out in stage 0 to reveal concept nodes) -->
     <g id="fogConceptNodes" style="transition:opacity 0.6s">
-      <rect x="430" y="160" width="160" height="270" rx="8" fill="#0f1117"/>
-      <text x="510" y="300" text-anchor="middle" font-size="36">❓</text>
+      <rect x="430" y="160" width="160" height="300" rx="8" fill="#111827"/>
+      <text x="510" y="315" text-anchor="middle" font-size="40">❓</text>
     </g>
 
     <g id="nodeConceptSkill" class="node" opacity="0">
-      <rect x="450" y="180" width="110" height="50" rx="8" fill="#1e1a0e" stroke="#fbbf24" stroke-width="1.5"/>
-      <text x="505" y="200" class="node-label" fill="#fbbf24">Skill</text>
-      <text x="505" y="216" class="node-sublabel">레시피</text>
+      <title>Skill — 재사용 가능한 레시피. Claude가 특정 작업을 수행하는 방법을 정의합니다.</title>
+      <rect x="450" y="185" width="120" height="54" rx="8" fill="#251e08" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="510" y="207" class="node-label" fill="#fbbf24">Skill</text>
+      <text x="510" y="225" class="node-sublabel">레시피</text>
     </g>
     <g id="nodeConceptAgent" class="node" opacity="0">
-      <rect x="450" y="270" width="110" height="50" rx="8" fill="#0f1e2e" stroke="#60a5fa" stroke-width="1.5"/>
-      <text x="505" y="290" class="node-label" fill="#60a5fa">Agent</text>
-      <text x="505" y="306" class="node-sublabel">셰프</text>
+      <title>Agent — 독립 실행 셰프. 도구와 MCP를 사용해 실제 작업을 수행합니다.</title>
+      <rect x="450" y="283" width="120" height="54" rx="8" fill="#0d1e3d" stroke="#60a5fa" stroke-width="1.5"/>
+      <text x="510" y="305" class="node-label" fill="#60a5fa">Agent</text>
+      <text x="510" y="323" class="node-sublabel">셰프</text>
     </g>
     <g id="nodeConceptTask" class="node" opacity="0">
-      <rect x="450" y="360" width="110" height="50" rx="8" fill="#0f1a0a" stroke="#a3e635" stroke-width="1.5"/>
-      <text x="505" y="380" class="node-label" fill="#a3e635">Task</text>
-      <text x="505" y="396" class="node-sublabel">주문 전표</text>
+      <title>Task — 주문 전표. 작업의 상태(pending/in_progress/completed)를 추적합니다.</title>
+      <rect x="450" y="381" width="120" height="54" rx="8" fill="#0a1f0e" stroke="#86efac" stroke-width="1.5"/>
+      <text x="510" y="403" class="node-label" fill="#86efac">Task</text>
+      <text x="510" y="421" class="node-sublabel">주문 전표</text>
     </g>
 
     <!-- ══════════════════════════════════
          STAGE 1: SINGLE AGENT
     ══════════════════════════════════ -->
 
-    <!-- Fog covering stage 1 area -->
-    <g id="fogStage1" style="transition:opacity 0.4s" opacity="1">
-      <rect x="375" y="200" width="520" height="200" fill="#161b27"/>
-    </g>
-
     <g id="nodeSkill1" class="node node-skill" opacity="0">
-      <rect x="390" y="255" width="118" height="54" rx="8"/>
-      <text x="449" y="277" class="node-label" fill="#fbbf24" font-size="10">/channel-faq</text>
-      <text x="449" y="293" class="node-sublabel">Skill</text>
+      <rect x="390" y="273" width="118" height="58" rx="8"/>
+      <text x="449" y="296" class="node-label" fill="#fbbf24" font-size="13">/channel-faq</text>
+      <text x="449" y="315" class="node-sublabel">Skill</text>
     </g>
 
     <g id="nodeAgent1" class="node node-agent" opacity="0" filter="url(#glow-blue)">
-      <rect x="570" y="255" width="110" height="54" rx="10"/>
-      <text x="625" y="274" class="node-label" fill="#60a5fa" font-size="10">🤖 Agent</text>
-      <text x="625" y="290" class="node-sublabel">채널 분석</text>
+      <title>Agent — Slack 채널 분석 에이전트. MCP를 통해 채널 메시지를 읽습니다.</title>
+      <rect x="575" y="273" width="120" height="58" rx="12"/>
+      <text x="635" y="294" class="node-label" fill="#60a5fa" font-size="13">🤖 Agent</text>
+      <text x="635" y="314" class="node-sublabel">채널 분석</text>
     </g>
 
     <g id="nodeMcpSlack1" class="node node-mcp" opacity="0">
-      <rect x="760" y="220" width="100" height="36" rx="6"/>
-      <text x="810" y="238" class="node-label" fill="#f472b6" font-size="10">Slack MCP</text>
+      <rect x="775" y="235" width="110" height="38" rx="8"/>
+      <text x="830" y="254" class="node-label" fill="#f472b6" font-size="13">Slack MCP</text>
     </g>
 
     <g id="nodeToolRead1" class="node node-tool" opacity="0">
-      <rect x="760" y="270" width="100" height="36" rx="6"/>
-      <text x="810" y="288" class="node-label" fill="#34d399">Read</text>
+      <rect x="775" y="287" width="110" height="38" rx="8"/>
+      <text x="830" y="306" class="node-label" fill="#34d399">Read</text>
     </g>
 
     <g id="nodeTaskDone" class="node node-task" opacity="0">
-      <rect x="760" y="320" width="100" height="36" rx="6"/>
-      <text x="810" y="333" class="node-label" fill="#a3e635" font-size="10">Task ✅</text>
-      <text x="810" y="348" class="node-sublabel">완료 추적</text>
+      <rect x="775" y="339" width="110" height="38" rx="8"/>
+      <text x="830" y="353" class="node-label" fill="#86efac" font-size="13">Task ✅</text>
+      <text x="830" y="370" class="node-sublabel">완료 추적</text>
     </g>
 
     <!-- ══════════════════════════════════
          STAGE 2: PARALLEL AGENTS
     ══════════════════════════════════ -->
 
-    <!-- Fog covering stage 2 area -->
-    <g id="fogStage2" style="transition:opacity 0.4s" opacity="1">
-      <rect x="355" y="120" width="660" height="320" fill="#161b27"/>
-    </g>
-
     <g id="nodeSkill2" class="node node-skill" opacity="0">
-      <rect x="370" y="255" width="118" height="54" rx="8"/>
-      <text x="429" y="277" class="node-label" fill="#fbbf24" font-size="10">/channel-faq</text>
-      <text x="429" y="293" class="node-sublabel">Skill</text>
+      <rect x="370" y="273" width="118" height="58" rx="8"/>
+      <text x="429" y="296" class="node-label" fill="#fbbf24" font-size="13">/channel-faq</text>
+      <text x="429" y="315" class="node-sublabel">Skill</text>
     </g>
 
     <!-- Parallel bracket indicator -->
     <g id="parallelBracket" class="node" opacity="0">
-      <text x="508" y="155" text-anchor="middle" font-size="8" fill="#60a5fa" opacity="0.6">|| parallel</text>
-      <line x1="505" y1="160" x2="505" y2="400" stroke="#60a5fa" stroke-width="1.5" opacity="0.4"/>
-      <line x1="505" y1="160" x2="512" y2="160" stroke="#60a5fa" stroke-width="1.5" opacity="0.4"/>
-      <line x1="505" y1="280" x2="512" y2="280" stroke="#60a5fa" stroke-width="1.5" opacity="0.4"/>
-      <line x1="505" y1="400" x2="512" y2="400" stroke="#60a5fa" stroke-width="1.5" opacity="0.4"/>
+      <text x="515" y="148" text-anchor="middle" font-size="12" font-weight="700" fill="#60a5fa" opacity="0.85" letter-spacing="1">‖ parallel</text>
+      <line x1="512" y1="155" x2="512" y2="420" stroke="#60a5fa" stroke-width="1.5" opacity="0.4"/>
+      <line x1="512" y1="155" x2="520" y2="155" stroke="#60a5fa" stroke-width="1.5" opacity="0.4"/>
+      <line x1="512" y1="302" x2="520" y2="302" stroke="#60a5fa" stroke-width="1.5" opacity="0.4"/>
+      <line x1="512" y1="420" x2="520" y2="420" stroke="#60a5fa" stroke-width="1.5" opacity="0.4"/>
     </g>
 
     <g id="nodeAgent2a" class="node node-agent" opacity="0" filter="url(#glow-blue)">
-      <rect x="520" y="160" width="110" height="48" rx="10"/>
-      <text x="575" y="179" class="node-label" fill="#60a5fa" font-size="10">🤖 Agent A</text>
-      <text x="575" y="195" class="node-sublabel">dev-support</text>
+      <rect x="528" y="165" width="120" height="52" rx="12"/>
+      <text x="588" y="186" class="node-label" fill="#60a5fa" font-size="13">🤖 Agent A</text>
+      <text x="588" y="205" class="node-sublabel">dev-support</text>
     </g>
     <g id="nodeAgent2b" class="node node-agent" opacity="0" filter="url(#glow-blue)">
-      <rect x="520" y="256" width="110" height="48" rx="10"/>
-      <text x="575" y="275" class="node-label" fill="#60a5fa" font-size="10">🤖 Agent B</text>
-      <text x="575" y="291" class="node-sublabel">product-qa</text>
+      <rect x="528" y="276" width="120" height="52" rx="12"/>
+      <text x="588" y="297" class="node-label" fill="#60a5fa" font-size="13">🤖 Agent B</text>
+      <text x="588" y="316" class="node-sublabel">product-qa</text>
     </g>
     <g id="nodeAgent2c" class="node node-agent" opacity="0" filter="url(#glow-blue)">
-      <rect x="520" y="352" width="110" height="48" rx="10"/>
-      <text x="575" y="371" class="node-label" fill="#60a5fa" font-size="10">🤖 Agent C</text>
-      <text x="575" y="387" class="node-sublabel">infra-help</text>
+      <rect x="528" y="387" width="120" height="52" rx="12"/>
+      <text x="588" y="408" class="node-label" fill="#60a5fa" font-size="13">🤖 Agent C</text>
+      <text x="588" y="427" class="node-sublabel">infra-help</text>
     </g>
 
     <g id="nodeMcp2a" class="node node-mcp" opacity="0">
-      <rect x="710" y="168" width="90" height="32" rx="6"/>
-      <text x="755" y="184" class="node-label" fill="#f472b6" font-size="9.5">Slack MCP</text>
+      <rect x="725" y="174" width="100" height="35" rx="8"/>
+      <text x="775" y="192" class="node-label" fill="#f472b6" font-size="13">Slack MCP</text>
     </g>
     <g id="nodeMcp2b" class="node node-mcp" opacity="0">
-      <rect x="710" y="264" width="90" height="32" rx="6"/>
-      <text x="755" y="280" class="node-label" fill="#f472b6" font-size="9.5">Slack MCP</text>
+      <rect x="725" y="285" width="100" height="35" rx="8"/>
+      <text x="775" y="303" class="node-label" fill="#f472b6" font-size="13">Slack MCP</text>
     </g>
     <g id="nodeMcp2c" class="node node-mcp" opacity="0">
-      <rect x="710" y="360" width="90" height="32" rx="6"/>
-      <text x="755" y="376" class="node-label" fill="#f472b6" font-size="9.5">Slack MCP</text>
+      <rect x="725" y="396" width="100" height="35" rx="8"/>
+      <text x="775" y="414" class="node-label" fill="#f472b6" font-size="13">Slack MCP</text>
     </g>
 
     <g id="nodeMerge2" class="node node-merge" opacity="0">
-      <rect x="870" y="240" width="110" height="80" rx="10"/>
-      <text x="925" y="273" class="node-label" fill="#a78bfa">결과 수집</text>
-      <text x="925" y="289" class="node-sublabel">merged Q&amp;A</text>
+      <rect x="895" y="266" width="120" height="80" rx="12"/>
+      <text x="955" y="299" class="node-label" fill="#a78bfa">결과 수집</text>
+      <text x="955" y="318" class="node-sublabel">merged Q&amp;A</text>
     </g>
 
     <!-- ══════════════════════════════════
-         STAGE 3: WORKFLOW (DAG)
+         STAGE 3: AI WORKFLOW PIPELINE
     ══════════════════════════════════ -->
-
-    <!-- Fog covering stage 3 area (starts at x=355 to avoid covering Claude node) -->
-    <g id="fogStage3" style="transition:opacity 0.4s" opacity="1">
-      <rect x="355" y="55" width="735" height="450" fill="#161b27"/>
-    </g>
 
     <!-- Outer container -->
     <g id="orchContainer3" class="node" opacity="0">
-      <rect x="220" y="60" width="860" height="440" rx="14"
-            fill="#130f1a" stroke="#a78bfa" stroke-width="2" stroke-dasharray="8 4"/>
-      <rect x="220" y="60" width="860" height="440" rx="14"
+      <rect x="370" y="65" width="810" height="560" rx="16"
+            fill="#130f1a" stroke="url(#containerBorderGradient)" stroke-width="2" stroke-dasharray="10 5"/>
+      <rect x="370" y="65" width="810" height="560" rx="16"
             fill="url(#dotGridPurple)" opacity="0.4"/>
-      <!-- Header strip -->
-      <rect x="220" y="60" width="860" height="28" rx="14" fill="#a78bfa" fill-opacity="0.12"/>
-      <rect x="220" y="74" width="860" height="14" fill="#a78bfa" fill-opacity="0.12"/>
+      <!-- Header gradient -->
+      <rect x="370" y="65" width="810" height="32" rx="16"
+            fill="url(#headerGradient)"/>
+      <rect x="370" y="81" width="810" height="16"
+            fill="url(#headerGradient)"/>
       <!-- Traffic light dots -->
-      <circle cx="238" cy="74" r="5" fill="#a78bfa" opacity="0.9"/>
-      <circle cx="254" cy="74" r="5" fill="#60a5fa" opacity="0.7"/>
-      <circle cx="270" cy="74" r="5" fill="#34d399" opacity="0.5"/>
+      <circle cx="390" cy="81" r="6" fill="#a78bfa" opacity="0.9"/>
+      <circle cx="408" cy="81" r="6" fill="#60a5fa" opacity="0.7"/>
+      <circle cx="426" cy="81" r="6" fill="#34d399" opacity="0.5"/>
       <!-- Container title -->
-      <text x="290" y="79" class="node-label" fill="#a78bfa" font-size="11" font-weight="700" text-anchor="start">/channel-faq</text>
+      <text x="446" y="86" class="node-label" fill="#a78bfa" font-size="13" font-weight="700" text-anchor="start">/channel-faq</text>
 
       <!-- Phase labels -->
-      <text x="340" y="100" text-anchor="middle" font-size="8" font-weight="700" fill="#60a5fa" opacity="0.7" letter-spacing="0.5">COLLECT (parallel)</text>
-      <text x="650" y="100" text-anchor="middle" font-size="8" font-weight="700" fill="#fbbf24" opacity="0.7" letter-spacing="0.5">ANALYZE (sequential)</text>
-      <text x="910" y="100" text-anchor="middle" font-size="8" font-weight="700" fill="#34d399" opacity="0.7" letter-spacing="0.5">GENERATE (sequential)</text>
+      <text x="555" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#60a5fa" opacity="0.85" letter-spacing="0.5">COLLECT (parallel)</text>
+      <text x="840" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#fbbf24" opacity="0.85" letter-spacing="0.5">ANALYZE (sequential)</text>
+      <text x="1070" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#34d399" opacity="0.85" letter-spacing="0.5">GENERATE (sequential)</text>
 
       <!-- Phase dividers -->
-      <line x1="510" y1="105" x2="510" y2="490" stroke="#334155" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
-      <line x1="780" y1="105" x2="780" y2="490" stroke="#334155" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+      <line x1="690" y1="115" x2="690" y2="618" stroke="#334155" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+      <line x1="990" y1="115" x2="990" y2="618" stroke="#334155" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+    </g>
+
+    <!-- ══════════════════════════════════
+         CLAUDE CODE (always visible, x=220 y=273 w=130 h=58)
+         — placed after orchContainer3 so it paints on top
+    ══════════════════════════════════ -->
+    <g id="nodeClaude" class="node node-claude" filter="url(#glow-purple)">
+      <title>Claude Code — AI 오케스트레이터. 사용자 요청을 받아 Skill/Agent/Task를 지휘합니다.</title>
+      <rect x="220" y="273" width="130" height="58" rx="12" fill="#1c1f3a" stroke="#a78bfa" stroke-width="2.5"/>
+      <text x="285" y="296" class="node-label" fill="#a78bfa" font-size="14">Claude Code</text>
+      <text x="285" y="316" class="node-sublabel">AI 에이전트</text>
     </g>
 
     <!-- Collect phase agents -->
     <g id="nodeWf2a" class="node node-agent" opacity="0" filter="url(#glow-blue)">
-      <rect x="280" y="150" width="110" height="46" rx="10"/>
-      <text x="335" y="169" class="node-label" fill="#60a5fa" font-size="10">🤖 Agent A</text>
-      <text x="335" y="185" class="node-sublabel">dev-support</text>
+      <rect x="430" y="155" width="120" height="52" rx="12"/>
+      <text x="490" y="176" class="node-label" fill="#60a5fa" font-size="13">🤖 Agent A</text>
+      <text x="490" y="196" class="node-sublabel">dev-support</text>
     </g>
     <g id="nodeWf2b" class="node node-agent" opacity="0" filter="url(#glow-blue)">
-      <rect x="280" y="240" width="110" height="46" rx="10"/>
-      <text x="335" y="259" class="node-label" fill="#60a5fa" font-size="10">🤖 Agent B</text>
-      <text x="335" y="275" class="node-sublabel">product-qa</text>
+      <rect x="430" y="275" width="120" height="52" rx="12"/>
+      <text x="490" y="296" class="node-label" fill="#60a5fa" font-size="13">🤖 Agent B</text>
+      <text x="490" y="316" class="node-sublabel">product-qa</text>
     </g>
     <g id="nodeWf2c" class="node node-agent" opacity="0" filter="url(#glow-blue)">
-      <rect x="280" y="330" width="110" height="46" rx="10"/>
-      <text x="335" y="349" class="node-label" fill="#60a5fa" font-size="10">🤖 Agent C</text>
-      <text x="335" y="365" class="node-sublabel">infra-help</text>
+      <rect x="430" y="395" width="120" height="52" rx="12"/>
+      <text x="490" y="416" class="node-label" fill="#60a5fa" font-size="13">🤖 Agent C</text>
+      <text x="490" y="436" class="node-sublabel">infra-help</text>
+    </g>
+
+    <!-- MCP nodes beside agents -->
+    <g id="nodeWfMcpA" class="node node-mcp" opacity="0">
+      <rect x="570" y="162" width="100" height="35" rx="8"/>
+      <text x="620" y="180" class="node-label" fill="#f472b6" font-size="13">Slack MCP</text>
+    </g>
+    <g id="nodeWfMcpB" class="node node-mcp" opacity="0">
+      <rect x="570" y="282" width="100" height="35" rx="8"/>
+      <text x="620" y="300" class="node-label" fill="#f472b6" font-size="13">Slack MCP</text>
+    </g>
+    <g id="nodeWfMcpC" class="node node-mcp" opacity="0">
+      <rect x="570" y="402" width="100" height="35" rx="8"/>
+      <text x="620" y="420" class="node-label" fill="#f472b6" font-size="13">Slack MCP</text>
     </g>
 
     <!-- Analyze phase agent -->
     <g id="nodeWfAnalyze" class="node node-analyze" opacity="0">
-      <rect x="595" y="230" width="110" height="60" rx="10"/>
-      <text x="650" y="254" class="node-label" fill="#fbbf24">Agent</text>
-      <text x="650" y="270" class="node-sublabel">Pattern Analysis</text>
+      <title>Analyze Agent — 수집된 메시지에서 패턴을 분석하는 순차 실행 에이전트.</title>
+      <rect x="625" y="275" width="120" height="62" rx="12"/>
+      <text x="685" y="300" class="node-label" fill="#fbbf24">Agent</text>
+      <text x="685" y="320" class="node-sublabel">Pattern Analysis</text>
     </g>
 
     <!-- Generate phase agent -->
     <g id="nodeWfGenerate" class="node node-generate" opacity="0">
-      <rect x="855" y="230" width="110" height="60" rx="10"/>
-      <text x="910" y="254" class="node-label" fill="#34d399">Agent</text>
-      <text x="910" y="270" class="node-sublabel">FAQ Doc Writer</text>
+      <title>Generate Agent — 분석 결과를 바탕으로 FAQ 문서를 작성하는 에이전트.</title>
+      <rect x="930" y="275" width="120" height="62" rx="12"/>
+      <text x="990" y="300" class="node-label" fill="#34d399">Agent</text>
+      <text x="990" y="320" class="node-sublabel">FAQ Doc Writer</text>
     </g>
 
-    <!-- MCP/Tool nodes inside container -->
-    <g id="nodeWfMcpA" class="node node-mcp" opacity="0">
-      <rect x="280" y="420" width="90" height="32" rx="6"/>
-      <text x="325" y="436" class="node-label" fill="#f472b6" font-size="9.5">Slack MCP</text>
-    </g>
-    <g id="nodeWfMcpB" class="node node-mcp" opacity="0">
-      <rect x="380" y="420" width="90" height="32" rx="6"/>
-      <text x="425" y="436" class="node-label" fill="#f472b6" font-size="9.5">Slack MCP</text>
-    </g>
-    <g id="nodeWfMcpC" class="node node-mcp" opacity="0">
-      <rect x="480" y="420" width="90" height="32" rx="6"/>
-      <text x="525" y="436" class="node-label" fill="#f472b6" font-size="9.5">Slack MCP</text>
-    </g>
+    <!-- Write tool -->
     <g id="nodeWfWrite" class="node node-tool" opacity="0">
-      <rect x="855" y="420" width="110" height="32" rx="6"/>
-      <text x="910" y="436" class="node-label" fill="#34d399">Write (md)</text>
+      <rect x="930" y="490" width="120" height="35" rx="8"/>
+      <text x="990" y="508" class="node-label" fill="#34d399">Write (md)</text>
     </g>
+
+    <!-- Flow labels -->
+    <text id="lblCollectAnalyze" x="600" y="268" text-anchor="middle"
+          font-size="11" fill="#fbbf24" fill-opacity="0.85" opacity="0">수집 완료</text>
+    <text id="lblAnalyzeGenerate" x="847" y="268" text-anchor="middle"
+          font-size="11" fill="#34d399" fill-opacity="0.85" opacity="0">분석 완료</text>
 
     <!-- ══════════════════════════════════
          ARROWS
     ══════════════════════════════════ -->
 
-    <!-- Person ↔ Claude (always visible) -->
+    <!-- Person <-> Claude (always visible) -->
     <path id="arrPersonClaude" class="arrow arrow-main"
-          d="M 93 274 L 218 274" marker-end="url(#ah-purple)"/>
+          d="M 97 288 L 218 288" marker-end="url(#ah-purple)"/>
     <path id="arrClaudePerson" class="arrow arrow-main"
-          d="M 220 264 L 94 264" marker-end="url(#ah-purple)"/>
+          d="M 220 312 L 98 312" marker-end="url(#ah-purple)"/>
 
     <!-- Stage 1 arrows -->
     <path id="arrClaudeSkill1" class="arrow arrow-skill" opacity="0"
-          d="M 350 282 L 388 282" marker-end="url(#ah-yellow)"/>
+          d="M 350 302 L 388 302" marker-end="url(#ah-yellow)"/>
     <path id="arrSkill1Agent1" class="arrow arrow-agent" opacity="0"
-          d="M 508 282 L 568 282" marker-end="url(#ah-blue)"/>
+          d="M 508 302 L 573 302" marker-end="url(#ah-blue)"/>
     <path id="arrAgent1Slack" class="arrow arrow-mcp" opacity="0"
-          d="M 680 268 C 720 250 740 242 758 238" marker-end="url(#ah-pink)"/>
+          d="M 695 288 C 735 268 752 260 773 254" marker-end="url(#ah-pink)"/>
     <path id="arrAgent1Read" class="arrow arrow-tool" opacity="0"
-          d="M 680 282 L 758 288" marker-end="url(#ah-green)"/>
+          d="M 695 302 L 773 306" marker-end="url(#ah-green)"/>
     <path id="arrAgent1Task" class="arrow arrow-task" opacity="0"
-          d="M 680 295 C 720 320 740 328 758 328" marker-end="url(#ah-lime)"/>
+          d="M 695 316 C 735 336 752 346 773 348" marker-end="url(#ah-lime)"/>
 
     <!-- Stage 2 arrows -->
     <path id="arrClaudeSkill2" class="arrow arrow-skill" opacity="0"
-          d="M 350 282 L 368 282" marker-end="url(#ah-yellow)"/>
+          d="M 350 302 L 368 302" marker-end="url(#ah-yellow)"/>
     <path id="arrSkill2AgentA" class="arrow arrow-agent" opacity="0"
-          d="M 488 274 C 502 220 510 196 518 184" marker-end="url(#ah-blue)"/>
+          d="M 488 294 C 502 248 512 218 526 191" marker-end="url(#ah-blue)"/>
     <path id="arrSkill2AgentB" class="arrow arrow-agent" opacity="0"
-          d="M 488 282 L 518 280" marker-end="url(#ah-blue)"/>
+          d="M 488 302 L 526 302" marker-end="url(#ah-blue)"/>
     <path id="arrSkill2AgentC" class="arrow arrow-agent" opacity="0"
-          d="M 488 292 C 502 340 510 362 518 376" marker-end="url(#ah-blue)"/>
+          d="M 488 312 C 502 360 512 388 526 413" marker-end="url(#ah-blue)"/>
     <path id="arrAgent2aMcp" class="arrow arrow-mcp" opacity="0"
-          d="M 630 184 L 708 184" marker-end="url(#ah-pink)"/>
+          d="M 648 191 L 723 191" marker-end="url(#ah-pink)"/>
     <path id="arrAgent2bMcp" class="arrow arrow-mcp" opacity="0"
-          d="M 630 280 L 708 280" marker-end="url(#ah-pink)"/>
+          d="M 648 302 L 723 302" marker-end="url(#ah-pink)"/>
     <path id="arrAgent2cMcp" class="arrow arrow-mcp" opacity="0"
-          d="M 630 376 L 708 376" marker-end="url(#ah-pink)"/>
+          d="M 648 413 L 723 413" marker-end="url(#ah-pink)"/>
     <path id="arrAgent2aMerge" class="arrow arrow-main" opacity="0"
-          stroke-dasharray="4 3"
-          d="M 630 190 C 750 220 820 250 868 265" marker-end="url(#ah-purple)"/>
+          stroke-dasharray="6 4"
+          d="M 648 197 C 770 237 840 265 893 281" marker-end="url(#ah-purple)"/>
     <path id="arrAgent2bMerge" class="arrow arrow-main" opacity="0"
-          stroke-dasharray="4 3"
-          d="M 630 280 L 868 280" marker-end="url(#ah-purple)"/>
+          stroke-dasharray="6 4"
+          d="M 648 302 L 893 302" marker-end="url(#ah-purple)"/>
     <path id="arrAgent2cMerge" class="arrow arrow-main" opacity="0"
-          stroke-dasharray="4 3"
-          d="M 630 374 C 750 340 820 308 868 295" marker-end="url(#ah-purple)"/>
+          stroke-dasharray="6 4"
+          d="M 648 419 C 770 375 840 338 893 323" marker-end="url(#ah-purple)"/>
 
     <!-- Stage 3 arrows -->
-    <!-- Claude orchestrates: dispatch indicator (orange stub) -->
+    <!-- Claude orchestrates: dispatch indicator (orange stub) to container header -->
     <path id="arrWfClaudeEntry" class="arrow arrow-wf-entry" opacity="0"
-          d="M 350 270 C 380 255 395 245 410 240" marker-end="url(#ah-orange)"/>
-    <!-- Fan-out: dispatch point to each collect agent -->
+          d="M 350 290 C 360 270 365 195 370 81" marker-end="url(#ah-orange)"/>
+    <!-- Fan-out to collect agents -->
     <path id="arrWfEntryA" class="arrow arrow-agent" opacity="0"
-          d="M 285 255 C 285 235 330 215 390 196" marker-end="url(#ah-blue)"/>
+          d="M 350 285 C 380 240 400 200 428 181" marker-end="url(#ah-blue)"/>
     <path id="arrWfEntryB" class="arrow arrow-agent" opacity="0"
-          d="M 350 272 C 365 268 378 265 390 263" marker-end="url(#ah-blue)"/>
+          d="M 350 302 L 428 301" marker-end="url(#ah-blue)"/>
     <path id="arrWfEntryC" class="arrow arrow-agent" opacity="0"
-          d="M 285 309 C 285 330 330 345 390 353" marker-end="url(#ah-blue)"/>
+          d="M 350 315 C 380 370 400 405 428 421" marker-end="url(#ah-blue)"/>
 
-    <!-- Agents → MCP nodes (downward) -->
+    <!-- Agents → MCP nodes (beside) -->
     <path id="arrWfAMcp" class="arrow arrow-mcp" opacity="0"
-          d="M 310 196 L 315 418" marker-end="url(#ah-pink)"/>
+          d="M 550 179 L 568 179" marker-end="url(#ah-pink)"/>
     <path id="arrWfBMcp" class="arrow arrow-mcp" opacity="0"
-          d="M 340 286 C 365 360 405 400 420 418" marker-end="url(#ah-pink)"/>
+          d="M 550 299 L 568 299" marker-end="url(#ah-pink)"/>
     <path id="arrWfCMcp" class="arrow arrow-mcp" opacity="0"
-          d="M 370 376 C 450 405 490 415 515 418" marker-end="url(#ah-pink)"/>
+          d="M 550 419 L 568 419" marker-end="url(#ah-pink)"/>
 
     <!-- Collect → Analyze (fan-in) -->
     <path id="arrWfAAnalyze" class="arrow arrow-wf-analyze" opacity="0"
-          d="M 390 173 C 490 200 550 230 593 250" marker-end="url(#ah-yellow)"/>
+          d="M 550 181 C 580 220 600 268 623 292" marker-end="url(#ah-yellow)"/>
     <path id="arrWfBAnalyze" class="arrow arrow-wf-analyze" opacity="0"
-          d="M 390 263 C 490 260 550 258 593 258" marker-end="url(#ah-yellow)"/>
+          d="M 550 299 L 623 299" marker-end="url(#ah-yellow)"/>
     <path id="arrWfCAnalyze" class="arrow arrow-wf-analyze" opacity="0"
-          d="M 390 353 C 490 320 550 285 593 268" marker-end="url(#ah-yellow)"/>
+          d="M 550 419 C 580 380 600 330 623 312" marker-end="url(#ah-yellow)"/>
 
     <!-- Analyze → Generate (sequential) -->
     <path id="arrWfAnalyzeGenerate" class="arrow arrow-wf-generate" opacity="0"
-          d="M 705 260 L 853 260" marker-end="url(#ah-green)"/>
+          d="M 745 306 L 928 306" marker-end="url(#ah-green)"/>
 
     <!-- Generate → Write tool (downward) -->
     <path id="arrWfGenerateWrite" class="arrow arrow-tool" opacity="0"
           stroke="#34d399"
-          d="M 910 290 L 910 418" marker-end="url(#ah-green)"/>
+          d="M 990 337 L 990 488" marker-end="url(#ah-green)"/>
+
+    <!-- Color legend — last child for z-order (always on top) -->
+    <g id="legend" transform="translate(1060, 18)">
+      <rect x="-10" y="-8" width="155" height="142" rx="8"
+            fill="#0d1117" fill-opacity="0.88"
+            stroke="#1e293b" stroke-width="1"/>
+      <text x="67" y="8" text-anchor="middle"
+            font-size="11" font-weight="700" fill="#94a3b8" letter-spacing="0.5">LEGEND</text>
+
+      <rect x="0" y="18" width="12" height="12" rx="3" fill="#1c1f3a" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="18" y="28" font-size="12" fill="#94a3b8">Claude (지휘)</text>
+
+      <rect x="0" y="36" width="12" height="12" rx="3" fill="#0d1e3d" stroke="#60a5fa" stroke-width="1.5"/>
+      <text x="18" y="46" font-size="12" fill="#94a3b8">Agent (실행)</text>
+
+      <rect x="0" y="54" width="12" height="12" rx="3" fill="#1e0f25" stroke="#f472b6" stroke-width="1.5"/>
+      <text x="18" y="64" font-size="12" fill="#94a3b8">MCP (도구)</text>
+
+      <rect x="0" y="72" width="12" height="12" rx="3" fill="#251e08" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="18" y="82" font-size="12" fill="#94a3b8">Skill (레시피)</text>
+
+      <rect x="0" y="90" width="12" height="12" rx="3" fill="#0a2018" stroke="#34d399" stroke-width="1.5"/>
+      <text x="18" y="100" font-size="12" fill="#94a3b8">Tool (파일 쓰기)</text>
+
+      <rect x="0" y="108" width="12" height="12" rx="3" fill="#0a1f0e" stroke="#86efac" stroke-width="1.5"/>
+      <text x="18" y="118" font-size="12" fill="#94a3b8">Task (추적)</text>
+    </g>
 
   </svg>
 
@@ -629,7 +848,7 @@
 
 <div class="progress-bar" id="progressBar"></div>
 
-<div class="nav-btns">
+<div class="nav-btns" id="navBtns">
   <button class="nav-btn" id="btnPrev">← 이전</button>
   <button class="nav-btn primary" id="btnNext">다음 →</button>
 </div>
@@ -670,57 +889,46 @@ const stages = [
   {
     title: "0. 개념: Skill / Agent / Task",
     message: "Skill은 레시피, Agent는 셰프, Task는 주문 전표 — 세 개념의 차이를 먼저 이해합니다.",
-    fog: {
-      fogConceptNodes: 0,
-      fogStage1: 1,
-      fogStage2: 1,
-      fogStage3: 1,
-    },
+    fog: { fogConceptNodes: 0 },
     show: ["nodeConceptSkill","nodeConceptAgent","nodeConceptTask"],
     showArrows: [],
+    animatedArrows: [],
+    flowLabels: [],
   },
   // ── 1. Single Agent ──
   {
     title: "1. Agent 하나 호출",
     message: "/channel-faq Skill이 Agent를 호출합니다. Agent는 Slack MCP로 채널을 읽고, 결과를 Claude에게 돌려줍니다.",
-    fog: {
-      fogConceptNodes: 1,
-      fogStage1: 0,
-      fogStage2: 1,
-      fogStage3: 1,
-    },
+    fog: { fogConceptNodes: 1 },
     show: ["nodeSkill1","nodeAgent1","nodeMcpSlack1","nodeToolRead1","nodeTaskDone"],
     showArrows: ["arrClaudeSkill1","arrSkill1Agent1","arrAgent1Slack","arrAgent1Read","arrAgent1Task"],
+    animatedArrows: ["arrAgent1Slack","arrAgent1Read"],
+    flowLabels: [],
   },
   // ── 2. Parallel Agents ──
   {
     title: "2. 여러 Agent 동시 실행",
     message: "여러 채널을 동시에 분석합니다. Agent들이 병렬로 실행되어 각자 독립적으로 Slack MCP에 접근합니다 — 하나씩 기다리는 것보다 훨씬 빠릅니다!",
-    fog: {
-      fogConceptNodes: 1,
-      fogStage1: 1,
-      fogStage2: 0,
-      fogStage3: 1,
-    },
+    fog: { fogConceptNodes: 1 },
     show: ["nodeSkill2","parallelBracket","nodeAgent2a","nodeAgent2b","nodeAgent2c","nodeMcp2a","nodeMcp2b","nodeMcp2c","nodeMerge2"],
     showArrows: ["arrClaudeSkill2","arrSkill2AgentA","arrSkill2AgentB","arrSkill2AgentC","arrAgent2aMcp","arrAgent2bMcp","arrAgent2cMcp","arrAgent2aMerge","arrAgent2bMerge","arrAgent2cMerge"],
+    animatedArrows: ["arrAgent2aMcp","arrAgent2bMcp","arrAgent2cMcp"],
+    flowLabels: [],
   },
-  // ── 3. Workflow (DAG) ──
+  // ── 3. AI 워크플로우 파이프라인 ──
   {
     title: "3. 수집 → 분석 → 생성 파이프라인",
-    message: "Task Topology: 수집은 병렬로, 분석과 생성은 순차로 — 의존성 그래프(DAG)가 최적 실행 순서를 결정합니다.",
-    fog: {
-      fogConceptNodes: 1,
-      fogStage1: 1,
-      fogStage2: 1,
-      fogStage3: 0,
-    },
+    message: "수집은 병렬로, 분석과 생성은 순차로 — AI가 작업 간 의존성을 파악해 최적 순서로 실행합니다.",
+    fog: { fogConceptNodes: 1 },
     show: ["orchContainer3","nodeWf2a","nodeWf2b","nodeWf2c","nodeWfAnalyze","nodeWfGenerate","nodeWfMcpA","nodeWfMcpB","nodeWfMcpC","nodeWfWrite"],
     showArrows: ["arrWfClaudeEntry","arrWfEntryA","arrWfEntryB","arrWfEntryC","arrWfAMcp","arrWfBMcp","arrWfCMcp","arrWfAAnalyze","arrWfBAnalyze","arrWfCAnalyze","arrWfAnalyzeGenerate","arrWfGenerateWrite"],
+    animatedArrows: ["arrWfAMcp","arrWfBMcp","arrWfCMcp","arrWfAnalyzeGenerate"],
+    flowLabels: ["lblCollectAnalyze","lblAnalyzeGenerate"],
   },
 ];
 
 let current = 0;
+let prevIdx = -1;
 
 function applyStage(idx) {
   const s = stages[idx];
@@ -734,38 +942,117 @@ function applyStage(idx) {
     if (el) el.style.opacity = opacity;
   }
 
-  // Nodes
-  allNodes.forEach(id => {
+  // Get nodes to hide (were visible, now should not be)
+  const toHide = allNodes.filter(id => !s.show.includes(id));
+  const toShow = s.show;
+
+  // Exit: stagger hide
+  toHide.forEach((id, i) => {
     const el = document.getElementById(id);
-    if (el) el.style.opacity = s.show.includes(id) ? "1" : "0";
+    if (!el || el.style.opacity === "0") return;
+    setTimeout(() => {
+      el.style.opacity = "0";
+      el.style.transform = "translateX(0)";
+      setTimeout(() => { el.style.visibility = "hidden"; }, 400);
+    }, i * 20);
   });
 
-  // Arrows
+  const exitDuration = Math.min(toHide.length * 20 + 60, 160);
+
+  // Enter: stagger show after exit (with fog delay for stage 0 concept nodes)
+  const conceptNodeIds = ["nodeConceptSkill","nodeConceptAgent","nodeConceptTask"];
+  const fogDelay = (idx === 0) ? 400 : 0;
+
+  toShow.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.visibility = "visible";
+    el.style.transform = "translateX(8px)";
+    const isConcept = conceptNodeIds.includes(id);
+    const delay = exitDuration + (isConcept ? fogDelay : 0) + i * 50;
+    setTimeout(() => {
+      el.style.opacity = "1";
+      el.style.transform = "translateX(0)";
+    }, delay);
+  });
+
+  // Arrows and flow labels — reset immediately
   allArrows.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.opacity = s.showArrows.includes(id) ? "1" : "0";
+    if (el) {
+      el.style.opacity = "0";
+      el.classList.remove("animated");
+    }
   });
+  ["lblCollectAnalyze","lblAnalyzeGenerate"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.opacity = "0";
+  });
+
+  s.showArrows.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    setTimeout(() => {
+      el.style.opacity = "1";
+      if (s.animatedArrows && s.animatedArrows.includes(id)) {
+        el.classList.add("animated");
+      }
+    }, exitDuration + 180 + i * 55);
+  });
+
+  if (s.flowLabels) {
+    s.flowLabels.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el) setTimeout(() => { el.style.opacity = "1"; }, exitDuration + 500 + i * 80);
+    });
+  }
 
   // Stage nav buttons
   document.querySelectorAll(".stage-btn").forEach((btn, i) => {
     btn.classList.toggle("active", i === idx);
   });
 
-  // Progress dots
+  // Progress fill bar
+  const fillEl = document.querySelector(".progress-fill");
+  if (fillEl) {
+    const pct = stages.length <= 1 ? 100 : (idx / (stages.length - 1)) * 100;
+    fillEl.style.width = pct + "%";
+  }
+
+  // Progress dot indicators
   document.querySelectorAll(".progress-dot").forEach((dot, i) => {
-    dot.classList.remove("done","current");
-    if (i < idx) dot.classList.add("done");
-    else if (i === idx) dot.classList.add("current");
+    dot.classList.toggle("active", i === idx);
+    dot.classList.toggle("reached", i < idx);
   });
 
   document.getElementById("btnPrev").disabled = idx === 0;
   const isLast = idx === stages.length - 1;
   document.getElementById("btnNext").disabled = isLast;
   document.getElementById("btnNext").textContent = isLast ? "완료! 🎉" : "다음 →";
+
+  // Restart button
+  const existingRestart = document.getElementById("btnRestart");
+  if (isLast) {
+    if (!existingRestart) {
+      const btnRestart = document.createElement("button");
+      btnRestart.id = "btnRestart";
+      btnRestart.className = "nav-btn";
+      btnRestart.textContent = "↺ 처음으로";
+      btnRestart.addEventListener("click", () => {
+        current = 0;
+        applyStage(0);
+      });
+      document.getElementById("navBtns").appendChild(btnRestart);
+    }
+  } else {
+    if (existingRestart) existingRestart.remove();
+  }
+
+  prevIdx = idx;
 }
 
 // Build stage nav buttons
-const navLabels = ["0. Concept","1. Single Agent","2. Parallel Agents","3. Workflow (DAG)"];
+const navLabels = ["0. 개념 이해","1. Agent 1개","2. 병렬 Agent","3. AI 워크플로우"];
 const nav = document.getElementById("stageNav");
 navLabels.forEach((label, i) => {
   const btn = document.createElement("button");
@@ -775,11 +1062,18 @@ navLabels.forEach((label, i) => {
   nav.appendChild(btn);
 });
 
-// Build progress dots
+// Build progress fill bar
 const pb = document.getElementById("progressBar");
-stages.forEach(() => {
+const fill = document.createElement("div");
+fill.className = "progress-fill";
+pb.appendChild(fill);
+
+// Add stage dots
+stages.forEach((_, i) => {
   const dot = document.createElement("div");
   dot.className = "progress-dot";
+  dot.style.left = (i / (stages.length - 1) * 100) + "%";
+  dot.addEventListener("click", () => { current = i; applyStage(i); });
   pb.appendChild(dot);
 });
 
@@ -800,6 +1094,46 @@ document.addEventListener("keydown", e => {
   }
 });
 
+// Node hover → highlight connected arrows
+function setupNodeHover() {
+  const nodeArrowMap = {
+    "nodeAgent1": ["arrClaudeSkill1","arrSkill1Agent1","arrAgent1Slack","arrAgent1Read","arrAgent1Task"],
+    "nodeAgent2a": ["arrSkill2AgentA","arrAgent2aMcp","arrAgent2aMerge"],
+    "nodeAgent2b": ["arrSkill2AgentB","arrAgent2bMcp","arrAgent2bMerge"],
+    "nodeAgent2c": ["arrSkill2AgentC","arrAgent2cMcp","arrAgent2cMerge"],
+    "nodeWfAnalyze": ["arrWfAAnalyze","arrWfBAnalyze","arrWfCAnalyze","arrWfAnalyzeGenerate"],
+    "nodeWfGenerate": ["arrWfAnalyzeGenerate","arrWfGenerateWrite"],
+    "nodeWf2a": ["arrWfEntryA","arrWfAMcp","arrWfAAnalyze"],
+    "nodeWf2b": ["arrWfEntryB","arrWfBMcp","arrWfBAnalyze"],
+    "nodeWf2c": ["arrWfEntryC","arrWfCMcp","arrWfCAnalyze"],
+  };
+
+  Object.entries(nodeArrowMap).forEach(([nodeId, arrowIds]) => {
+    const node = document.getElementById(nodeId);
+    if (!node) return;
+    node.style.cursor = "pointer";
+    node.addEventListener("mouseenter", () => {
+      arrowIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.style.opacity !== "0") {
+          el.style.strokeWidth = "4";
+          el.style.filter = "drop-shadow(0 0 4px currentColor)";
+        }
+      });
+    });
+    node.addEventListener("mouseleave", () => {
+      arrowIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.strokeWidth = "";
+          el.style.filter = "";
+        }
+      });
+    });
+  });
+}
+
+setupNodeHover();
 applyStage(0);
 </script>
 </body>

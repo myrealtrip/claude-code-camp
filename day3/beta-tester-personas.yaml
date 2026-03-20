@@ -4,72 +4,6 @@
 
 personas:
   - id: persona-1
-    name: 김서연
-    role: 백엔드 개발자 (3년차)
-    team: 숙박 도메인팀
-    age: 28
-    tech_literacy: high
-    claude_code_proficiency: intermediate
-    profile:
-      background: |
-        컴퓨터공학 전공. Spring Boot + Kotlin 기반 숙박 예약 API를 담당하고 있다.
-        Day 1에서 CLAUDE.md에 팀 코딩 컨벤션과 4-Layer 아키텍처 규칙을 꼼꼼히 정리했고,
-        Day 2에서는 Jira 티켓 → 브랜치 생성 → PR 생성을 자동화하는 Skill을 만들었다.
-        터미널과 Git에 익숙하며, 평소에도 CLI 도구를 선호한다.
-      current_pain_points:
-        - 대규모 리팩토링 시 여러 파일을 동시에 수정해야 하는데 하나씩 처리하면 느리다
-        - 코드 리뷰 요청 전 lint, test, security check를 매번 수동으로 돌린다
-        - MSA 환경에서 여러 서비스에 걸친 변경사항의 영향 범위를 파악하기 어렵다
-      day1_result: CLAUDE.md에 Kotlin 코딩 컨벤션, DB 네이밍 규칙, API 스펙 가이드 링크 정리
-      day2_result: /quick-git Skill 완성 (Jira 연동 + 브랜치 + 커밋 + PR 자동화)
-      expectations_for_day3:
-        - 여러 agent가 동시에 다른 파일을 리팩토링하는 방법
-        - CI 파이프라인처럼 lint → test → review를 agent 체인으로 자동화
-        - 이게 진짜 병렬로 도는 건지, 순차 실행과 뭐가 다른지 원리를 알고 싶다
-      personality: |
-        꼼꼼하고 원리를 이해해야 직성이 풀리는 타입. "왜?" 질문을 자주 한다.
-        새로운 기능이 나오면 공식 문서부터 읽는 편. 실습 속도가 빠르지만
-        이해가 안 되면 넘어가지 않고 질문한다.
-      potential_friction:
-        - subagent 간 충돌(같은 파일 동시 수정)에 대한 우려가 클 것
-        - 성능 벤치마크를 요구할 수 있음
-        - 이걸 그냥 쉘 스크립트로 하면 안 되나? 같은 날카로운 질문 예상
-
-  - id: persona-2
-    name: 박지호
-    role: 마케팅 매니저
-    team: 그로스마케팅팀
-    age: 34
-    tech_literacy: low
-    claude_code_proficiency: beginner
-    profile:
-      background: |
-        경영학 전공. 퍼포먼스 마케팅과 CRM 캠페인을 담당하고 있다.
-        Day 1에서 Claude Code 설치에 30분 걸렸고, 터미널 자체가 낯설었다.
-        그래도 CLAUDE.md에 "마케팅 보고서 작성 시 항상 한국어, 표 형식 사용" 같은
-        규칙을 넣는 것에 성공했고, 이것만으로도 큰 성취감을 느꼈다.
-        Day 2에서는 강사의 도움을 받아 간단한 Skill 하나를 만들었다.
-      current_pain_points:
-        - 매주 채널별 성과 데이터를 모아 주간 보고서를 수동으로 만든다
-        - GA, 내부 BI, 광고 플랫폼 등 여러 소스의 데이터를 취합하는 게 반복적
-        - 경쟁사 프로모션 모니터링을 매일 수작업으로 하고 있다
-      day1_result: CLAUDE.md에 보고서 포맷, 선호 언어(한국어), 마케팅 용어 사전 추가
-      day2_result: /weekly-report Skill 초안 (CSV 파일을 읽어 표로 정리하는 수준)
-      expectations_for_day3:
-        - 여러 사이트를 동시에 조사해서 하나의 보고서로 합쳐주는 것
-        - 기술 용어 최소화, 비유와 시각적 설명 선호
-        - 내가 이걸 실무에서 바로 쓸 수 있는 구체적 예시
-      personality: |
-        호기심이 많고 배우려는 의지가 강하지만, 기술 용어에 쉽게 위축된다.
-        "agent", "parallel", "orchestration" 같은 단어를 들으면 멈칫한다.
-        실습 시간에 옆 사람에게 "이거 어떻게 하는 거예요?" 하고 물어보는 편.
-        하지만 한번 이해하면 자기 업무에 적용하는 응용력이 뛰어나다.
-      potential_friction:
-        - subagent라는 개념 자체가 추상적으로 느껴질 수 있음
-        - 터미널에서 여러 agent가 동시에 출력하면 혼란스러워할 가능성
-        - 실습 속도가 느려서 뒤처질 수 있음 → 단계별 체크포인트 필요
-
-  - id: persona-3
     name: 이준혁
     role: 시니어 프론트엔드 개발자 (8년차)
     team: 플랫폼 UX팀
@@ -102,7 +36,7 @@ personas:
         - 고급 사용자용 보너스 챌린지가 필요
         - edge case나 한계점에 대한 질문이 많을 것 (동시 수정 충돌, 토큰 한도 등)
 
-  - id: persona-4
+  - id: persona-2
     name: 최은비
     role: 데이터 분석가 (2년차)
     team: 비즈니스 인텔리전스팀
@@ -136,7 +70,7 @@ personas:
         - subagent가 파일을 생성하는 위치나 결과물 확인 방법에 혼란 가능
         - Jupyter 환경과 CLI 환경의 차이에서 오는 불편함
 
-  - id: persona-5
+  - id: persona-3
     name: 정민수
     role: 전략기획 파트장 (6년차)
     team: 경영전략팀
@@ -174,15 +108,15 @@ personas:
 
 # Literacy Distribution Summary
 # ┌─────────────────────────────────────────────────────────┐
-# │  tech_literacy    : low ── medium_low ── medium ── high ── very_high  │
-# │  persona-2(박지호) ·  persona-5(정민수) · persona-4(최은비) · persona-1(김서연) · persona-3(이준혁)  │
+# │  tech_literacy    : medium_low ── medium ── very_high   │
+# │  persona-3(정민수) · persona-2(최은비) · persona-1(이준혁)  │
 # │                                                         │
-# │  claude_proficiency: beginner ──────── intermediate ──── advanced     │
-# │  persona-2,5       ·  persona-4       · persona-1       · persona-3  │
+# │  claude_proficiency: beginner ── beginner_to_intermediate ── advanced │
+# │  persona-3         · persona-2                          · persona-1  │
 # └─────────────────────────────────────────────────────────┘
 #
 # Role Distribution:
-#   - 개발자 2명 (백엔드 3년차, 프론트엔드 8년차)
-#   - 비개발 3명 (마케터, 데이터분석가, 전략기획)
+#   - 개발자 1명 (프론트엔드 8년차)
+#   - 비개발 2명 (데이터분석가, 전략기획)
 #
-# 이 분포를 통해 Day 3 강의가 모든 레벨에서 작동하는지 검증할 수 있음
+# 이 분포를 통해 Day 3 강의가 다양한 레벨에서 작동하는지 검증할 수 있음
