@@ -1,0 +1,2481 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Day 4: Scale Up — 스킬 배포와 확장</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --text: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --purple: #a78bfa;
+  --blue: #60a5fa;
+  --amber: #fbbf24;
+  --green: #34d399;
+  --pink: #f472b6;
+  --glass-bg: rgba(15,17,23,0.6);
+  --glass-border: rgba(255,255,255,0.1);
+  --max-w: 720px;
+  --slide-pad: 24px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+/* Progress bar */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--purple), var(--blue), var(--green));
+  z-index: 1000;
+  transition: width 0.15s ease-out;
+  width: 0%;
+}
+
+/* Scroll container */
+#scroll-container {
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Slide */
+.slide {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: start;
+  position: relative;
+  overflow-y: auto;
+}
+
+.slide-inner {
+  max-width: var(--max-w);
+  width: 100%;
+  padding: var(--slide-pad);
+  margin: 0 auto;
+}
+
+/* Animations — initial hidden state */
+.anim-fade { opacity: 0; transform: translateY(30px); }
+.anim-fade-x { opacity: 0; transform: translateX(-20px); }
+.anim-scale { opacity: 0; transform: scale(0.95); }
+.anim-stagger-row { opacity: 0; transform: translateY(20px); }
+.anim-title { opacity: 0; transform: scale(1.1) translateY(20px); }
+
+/* Typography */
+h1 { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; line-height: 1.3; }
+h3 { font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 600; line-height: 1.4; }
+p, li { font-size: clamp(1rem, 2.5vw, 1.125rem); }
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--purple), var(--blue), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-tag {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  padding: 4px 12px;
+  border: 1px solid rgba(167,139,250,0.3);
+  border-radius: 20px;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  margin-top: 16px;
+  font-weight: 400;
+}
+
+/* Quote */
+.quote {
+  font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.quote::before {
+  content: '\201C';
+  display: block;
+  font-size: 4rem;
+  color: var(--purple);
+  opacity: 0.4;
+  line-height: 1;
+  margin-bottom: -10px;
+}
+
+/* Cards */
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+/* Journey cards */
+.journey-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  position: relative;
+}
+
+@media (max-width: 600px) {
+  .journey-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.journey-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 20px 16px;
+  text-align: center;
+  position: relative;
+}
+
+.journey-card .day-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.journey-card .day-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.journey-card .day-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.journey-card .day-for {
+  font-size: 0.75rem;
+  margin-top: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.journey-card.highlight {
+  border-color: var(--purple);
+  box-shadow: 0 0 30px rgba(167,139,250,0.15), inset 0 0 30px rgba(167,139,250,0.05);
+}
+
+.journey-arrow {
+  display: none;
+}
+
+@media (min-width: 601px) {
+  .journey-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    z-index: 2;
+  }
+}
+
+/* Numbered items */
+.numbered-list {
+  list-style: none;
+  counter-reset: numbered;
+}
+
+.numbered-list li {
+  counter-increment: numbered;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.numbered-list li::before {
+  content: counter(numbered);
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Meta steps */
+.meta-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+
+.meta-step {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 20px 24px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.meta-step-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.meta-step-content h4 {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.meta-step-content p {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+}
+
+.meta-arrow {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+}
+
+/* Do/Don't table */
+.comparison-table {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 500px) {
+  .comparison-table { grid-template-columns: 1fr; }
+}
+
+.comparison-col {
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid var(--glass-border);
+}
+
+.comparison-col h4 {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.comparison-col.do h4 { color: var(--green); }
+.comparison-col.dont h4 { color: var(--text-secondary); opacity: 0.6; }
+
+.comparison-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comparison-col ul li {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  padding-left: 20px;
+  position: relative;
+}
+
+.comparison-col.do ul li::before { content: '\2713'; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+.comparison-col.dont ul li::before { content: '\2717'; position: absolute; left: 0; color: var(--text-secondary); opacity: 0.4; }
+.comparison-col.dont ul li { opacity: 0.5; }
+
+/* Metaphor cards */
+.metaphor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 500px) {
+  .metaphor-grid { grid-template-columns: 1fr; }
+}
+
+.metaphor-card {
+  text-align: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 28px 16px;
+}
+
+.metaphor-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.metaphor-eq {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+/* Directory tree */
+.dir-tree {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: clamp(0.8125rem, 2vw, 0.9375rem);
+  line-height: 1.7;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 24px;
+  overflow-x: auto;
+}
+
+.dir-tree .annotation {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.dir-tree .folder { color: var(--blue); }
+.dir-tree .file { color: var(--text); }
+.dir-tree .highlight-line { color: var(--amber); }
+
+/* Terminal */
+.terminal {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.terminal-dot.red { background: #ff5f57; }
+.terminal-dot.yellow { background: #febc2e; }
+.terminal-dot.green { background: #28c840; }
+
+.terminal-body {
+  padding: 20px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: clamp(0.8125rem, 2vw, 0.9375rem);
+  line-height: 1.8;
+}
+
+.terminal-body .step-label {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  margin-bottom: 4px;
+  margin-top: 16px;
+}
+
+.terminal-body .step-label:first-child { margin-top: 0; }
+
+.terminal-body .cmd {
+  color: var(--green);
+}
+
+.terminal-body .cmd::before {
+  content: '> ';
+  color: var(--text-secondary);
+}
+
+/* Code blocks */
+.code-block-wrapper {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+}
+
+.code-block-wrapper pre {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-size: clamp(0.8125rem, 2vw, 0.9375rem) !important;
+  line-height: 1.7 !important;
+}
+
+.code-block-wrapper code {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace !important;
+}
+
+/* Pill badges */
+.pill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pill-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pill-badge {
+  flex-shrink: 0;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  background: rgba(167,139,250,0.15);
+  color: var(--purple);
+  border: 1px solid rgba(167,139,250,0.3);
+}
+
+.pill-desc {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+}
+
+/* Tip card */
+.tip-card {
+  background: rgba(251,191,36,0.05);
+  border: 1px solid rgba(251,191,36,0.2);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.tip-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  font-weight: 700;
+  color: var(--amber);
+}
+
+.tip-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tip-card ul li {
+  font-size: 0.9375rem;
+  padding-left: 20px;
+  position: relative;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.tip-card ul li::before {
+  content: '\2022';
+  position: absolute;
+  left: 0;
+  color: var(--amber);
+}
+
+.tip-card .emphasis {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Quiz card */
+.quiz-card {
+  background: rgba(167,139,250,0.05);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 16px;
+  padding: 28px;
+}
+
+.quiz-label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+.quiz-question {
+  font-size: clamp(1.0625rem, 2.5vw, 1.25rem);
+  font-weight: 600;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.quiz-options {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.quiz-options li {
+  font-size: 1rem;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.quiz-options li:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(167,139,250,0.4);
+}
+
+.quiz-options li.correct {
+  background: rgba(52,211,153,0.15);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.quiz-options li.correct::after {
+  content: ' ✓ 정답!';
+  font-weight: 700;
+  color: var(--green);
+}
+
+.quiz-options li.wrong {
+  background: rgba(244,114,182,0.1);
+  border-color: var(--pink);
+  opacity: 0.6;
+}
+
+.quiz-options li.wrong::after {
+  content: ' ✗';
+  color: var(--pink);
+}
+
+.quiz-options li.disabled {
+  pointer-events: none;
+}
+
+
+.quiz-answer {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  padding: 16px;
+  background: rgba(52,211,153,0.08);
+  border: 1px solid rgba(52,211,153,0.2);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.quiz-answer.revealed { opacity: 1; }
+
+.quiz-answer-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+
+.quiz-answer p {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+}
+
+/* Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+.data-table th {
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  line-height: 1.5;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+
+/* SVG styles */
+.diagram-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.diagram-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Transition arrow */
+.transition-visual {
+  text-align: center;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.transition-visual .from {
+  color: var(--text-secondary);
+}
+
+.transition-visual .arrow {
+  color: var(--purple);
+}
+
+.transition-visual .to {
+  color: var(--text);
+}
+
+/* Flow steps */
+.flow-horizontal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.flow-step {
+  text-align: center;
+  padding: 16px 12px;
+  min-width: 100px;
+}
+
+.flow-step .flow-label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.flow-step .flow-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.flow-arrow {
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+}
+
+/* Checklist */
+.checklist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.checklist li {
+  font-size: 0.9375rem;
+  padding-left: 24px;
+  position: relative;
+  color: var(--text-secondary);
+}
+
+.checklist li::before {
+  content: '\2610';
+  position: absolute;
+  left: 0;
+  color: var(--purple);
+}
+
+/* Action plan table */
+.action-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.action-table td {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  vertical-align: top;
+}
+
+.action-table td:first-child {
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--purple);
+  width: 100px;
+}
+
+.action-table tr:last-child td { border-bottom: none; }
+
+/* Glow effect */
+.glow-box {
+  box-shadow: 0 0 40px rgba(167,139,250,0.1), 0 0 80px rgba(96,165,250,0.05);
+}
+
+/* Big centered text */
+.big-text {
+  font-size: clamp(1.25rem, 3.5vw, 1.875rem);
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.big-text-secondary {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: 20px;
+  line-height: 1.6;
+}
+
+/* Floating glass button */
+#floating-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 900;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 12px 18px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-width: 120px;
+}
+
+#floating-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+#floating-btn:active {
+  transform: scale(0.97);
+}
+
+#floating-slide-num {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+#floating-section-info {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+/* TOC overlay */
+#toc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(0,0,0,0.6);
+}
+
+#toc-overlay.open { display: flex; }
+
+#toc-panel {
+  background: rgba(15,17,23,0.95);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 400px;
+  width: calc(100% - 48px);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+#toc-panel h3 {
+  font-size: 1.125rem;
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+}
+
+.toc-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-bottom: 4px;
+}
+
+.toc-item:hover { background: rgba(255,255,255,0.06); }
+.toc-item.active { background: rgba(167,139,250,0.1); }
+
+.toc-item-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.toc-item-meta {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+#toc-close {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 28px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s ease;
+}
+
+#toc-close:hover { background: rgba(255,255,255,0.1); }
+
+/* Key points triple */
+.key-points {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.key-points li {
+  font-size: clamp(0.9375rem, 2.5vw, 1.0625rem);
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  border-left: 3px solid var(--purple);
+  list-style: none;
+}
+
+/* Branch diagram helpers */
+.branch-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.branch-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.9375rem;
+}
+
+.branch-table td:last-child {
+  text-align: center;
+  font-weight: 700;
+}
+
+/* Repo card */
+.repo-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.repo-card .repo-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--blue);
+  margin-bottom: 4px;
+}
+
+.repo-card .repo-count {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.repo-card .repo-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.repo-card .repo-tag {
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  background: rgba(96,165,250,0.1);
+  color: var(--blue);
+  border: 1px solid rgba(96,165,250,0.2);
+}
+
+/* End slide */
+.end-text {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: -0.03em;
+}
+
+.end-sub {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-top: 16px;
+}
+
+/* Copy-paste diagram */
+.copypaste-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+@media (max-width: 500px) {
+  .copypaste-grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+.copypaste-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+.copypaste-box h4 {
+  font-size: 0.9375rem;
+  margin-bottom: 16px;
+}
+
+.copypaste-box .inner-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.copypaste-box .inner-item {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  background: rgba(167,139,250,0.1);
+  color: var(--purple);
+}
+
+.copypaste-arrow {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* Prompt block */
+.prompt-block {
+  background: rgba(167,139,250,0.05);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 16px;
+  padding: 24px;
+  font-size: clamp(0.9375rem, 2vw, 1rem);
+  line-height: 1.7;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* Mari card */
+.mari-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 28px;
+}
+
+.mari-card .mari-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: var(--green);
+}
+
+.mari-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mari-card ul li {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  padding-left: 20px;
+  position: relative;
+}
+
+.mari-card ul li::before {
+  content: '\2022';
+  position: absolute;
+  left: 0;
+  color: var(--green);
+}
+
+/* Participation box */
+.participation-box {
+  text-align: center;
+  background: rgba(96,165,250,0.08);
+  border: 1px solid rgba(96,165,250,0.2);
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.participation-box .channel-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--blue);
+  margin-bottom: 8px;
+}
+
+/* Note text */
+.note-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-top: 16px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<div id="scroll-container">
+
+<!-- ==================== SECTION 0: Recap + 오늘의 여정 ==================== -->
+
+<!-- Slide 1: Hero Title -->
+<section class="slide" data-section="0" data-section-name="Recap" data-section-time="5분" data-slide="1">
+  <div class="slide-inner" style="text-align:center;">
+    <p class="anim-fade" style="font-size:1rem; color:var(--text-secondary); margin-bottom:8px; font-weight:600; letter-spacing:0.1em;">CLAUDE CODE CAMP</p>
+    <h1 class="anim-title">
+      <span style="display:block; font-size:clamp(1rem,3vw,1.5rem); color:var(--text-secondary); font-weight:600; margin-bottom:8px;">Day 4: Scale Up</span>
+      <span class="gradient-text" style="display:block;">스킬 배포와 확장</span>
+    </h1>
+    <p class="anim-fade subtitle" style="margin-top:12px;">플러그인에서 Agent SDK까지</p>
+    <p class="anim-fade" style="color:var(--text-secondary); margin-top:24px; font-size:clamp(0.9375rem, 2vw, 1.0625rem); max-width:480px; margin-left:auto; margin-right:auto; line-height:1.6;">만든 것을 퍼뜨리고, AI 에이전트가 쓸 수 있는 도구를 만들어라</p>
+  
+</div>
+</section>
+
+<!-- Slide 2: 핵심 메시지 -->
+<section class="slide" data-section="0" data-section-name="Recap" data-section-time="5분" data-slide="2">
+  <div class="slide-inner">
+    <div class="quote anim-fade">
+      AI 에이전트가 쓸 수 있는 도구를 만들어라.
+    </div>
+    <p class="big-text-secondary anim-fade" style="margin-top:12px;">만약 딱 하나만 만들 수 있다면 — GUI가 아니라 Skill을 만들어라.</p>
+  
+</div>
+</section>
+
+<!-- Slide 3: 4일 여정 다이어그램 -->
+<section class="slide" data-section="0" data-section-name="Recap" data-section-time="5분" data-slide="3">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="text-align:center; margin-bottom:32px; color:var(--text-secondary);">4일의 여정</h3>
+    <div class="journey-grid anim-scale">
+      <div class="journey-card" style="border-color: rgba(96,165,250,0.3);">
+        <div class="day-label" style="color:var(--blue);">Day 1</div>
+        <div class="day-title">Setting Up</div>
+        <div class="day-desc">CLAUDE.md, Memory</div>
+        <div class="day-for" style="color:var(--blue);">for ME</div>
+      </div>
+      <div class="journey-card" style="border-color: rgba(251,191,36,0.3);">
+        <div class="day-label" style="color:var(--amber);">Day 2</div>
+        <div class="day-title">Skill Up</div>
+        <div class="day-desc">Skill, Chaining</div>
+        <div class="day-for" style="color:var(--amber);">for MY WORK</div>
+      </div>
+      <div class="journey-card" style="border-color: rgba(52,211,153,0.3);">
+        <div class="day-label" style="color:var(--green);">Day 3</div>
+        <div class="day-title">Team Up</div>
+        <div class="day-desc">Agent, Parallel</div>
+        <div class="day-for" style="color:var(--green);">for MY TEAM</div>
+      </div>
+      <div class="journey-card highlight">
+        <div class="day-label" style="color:var(--purple);">Day 4</div>
+        <div class="day-title">Scale Up</div>
+        <div class="day-desc">Plugin, Marketplace, SDK</div>
+        <div class="day-for" style="color:var(--purple);">for EVERYONE</div>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 4: 오늘의 질문 -->
+<section class="slide" data-section="0" data-section-name="Recap" data-section-time="5분" data-slide="4">
+  <div class="slide-inner">
+    <h2 class="anim-title big-text" style="margin-bottom:40px;">이걸 옆 자리 동료도<br>쓸 수 있게 하려면?</h2>
+    <ol class="numbered-list anim-fade">
+      <li>마켓플레이스에서 플러그인 설치하기 <span style="color:var(--text-secondary);">(소비자)</span></li>
+      <li>내 스킬을 플러그인으로 패키징하기 <span style="color:var(--text-secondary);">(생산자)</span></li>
+      <li>스킬을 다른 채널로 확장하기 <span style="color:var(--text-secondary);">(Agent SDK)</span></li>
+    </ol>
+  
+</div>
+</section>
+
+<!-- Slide 5: 메타 지식 3단계 -->
+<section class="slide" data-section="0" data-section-name="Recap" data-section-time="5분" data-slide="5">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="text-align:center; margin-bottom:32px;">메타 지식 3단계</h3>
+    <div class="meta-steps">
+      <div class="meta-step anim-stagger-row" style="border-color: rgba(244,114,182,0.3);">
+        <div class="meta-step-icon" style="background:rgba(244,114,182,0.12);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--pink)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 5C5.6 5 1 12 1 12s4.6 7 11 7 11-7 11-7-4.6-7-11-7z"/></svg>
+        </div>
+        <div class="meta-step-content">
+          <h4 style="color:var(--pink);">Detect</h4>
+          <p>"안 된다" — 기대와 현상의 불일치를 감지</p>
+        </div>
+      </div>
+      <div class="meta-arrow anim-stagger-row">&#8595;</div>
+      <div class="meta-step anim-stagger-row" style="border-color: rgba(251,191,36,0.3);">
+        <div class="meta-step-icon" style="background:rgba(251,191,36,0.12);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+        </div>
+        <div class="meta-step-content">
+          <h4 style="color:var(--amber);">Suspect</h4>
+          <p>"어디가 문제일까" — 의심 대상 목록을 안다</p>
+        </div>
+      </div>
+      <div class="meta-arrow anim-stagger-row">&#8595;</div>
+      <div class="meta-step anim-stagger-row" style="border-color: rgba(52,211,153,0.3);">
+        <div class="meta-step-icon" style="background:rgba(52,211,153,0.12);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="meta-step-content">
+          <h4 style="color:var(--green);">Verify</h4>
+          <p>"어떻게 확인하지" — 검증 경로를 안다</p>
+        </div>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 6: Do/Don't 표 -->
+<section class="slide" data-section="0" data-section-name="Recap" data-section-time="5분" data-slide="6">
+  <div class="slide-inner">
+    <div class="comparison-table anim-scale">
+      <div class="comparison-col do">
+        <h4>알아야 할 것</h4>
+        <ul>
+          <li>플러그인 디렉토리 구조</li>
+          <li>plugin.json 위치와 역할</li>
+          <li>--plugin-dir 로컬 테스트</li>
+          <li>마켓플레이스 1:N 관계</li>
+          <li>"안 될 때 어디를 봐야 하는지"</li>
+          <li>공식 문서 기반 질문법</li>
+          <li>claude-code-guide 멘션 방법</li>
+          <li>Skill&#8594;Plugin&#8594;Marketplace 흐름</li>
+        </ul>
+      </div>
+      <div class="comparison-col dont">
+        <h4>몰라도 되는 것</h4>
+        <ul>
+          <li>JSON 문법 직접 작성</li>
+          <li>모든 필드 스펙 외우기</li>
+          <li>서버 인프라 구조</li>
+          <li>marketplace.json 세부 필드</li>
+          <li>에러 로그 직접 디버깅</li>
+          <li>Claude Code 내부 원리</li>
+          <li>Agent SDK 코드 직접 작성</li>
+          <li>Git/GitHub PR 기술 세부사항</li>
+        </ul>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 7: 핵심 원칙 -->
+<section class="slide" data-section="0" data-section-name="Recap" data-section-time="5분" data-slide="7">
+  <div class="slide-inner">
+    <div class="quote anim-fade">
+      작성은 Claude가, 검증은 내가.<br>
+      <span style="font-size:0.85em; color:var(--text-secondary);">단, 검증하려면 구조는 알아야 한다.</span>
+    </div>
+  
+</div>
+</section>
+
+
+<!-- ==================== SECTION 1: 마켓플레이스 체험 ==================== -->
+
+<!-- Slide 8: Section Title -->
+<section class="slide" data-section="1" data-section-name="마켓플레이스 체험" data-section-time="20분" data-slide="8">
+  <div class="slide-inner" style="text-align:center;">
+    <span class="section-tag anim-fade">섹션 1</span>
+    <h1 class="anim-title gradient-purple" style="margin-bottom:12px;">마켓플레이스 체험</h1>
+    <p class="subtitle anim-fade">설치해보기 &middot; 20분</p>
+  
+</div>
+</section>
+
+<!-- Slide 9: 플러그인 비유 -->
+<section class="slide" data-section="1" data-section-name="마켓플레이스 체험" data-section-time="20분" data-slide="9">
+  <div class="slide-inner">
+    <div class="metaphor-grid">
+      <div class="metaphor-card anim-stagger-row">
+        <div class="metaphor-icon">&#x1F4DC;</div>
+        <h3 style="color:var(--amber);">레시피</h3>
+        <div class="metaphor-eq">= Skill</div>
+      </div>
+      <div class="metaphor-card anim-stagger-row">
+        <div class="metaphor-icon">&#x1F4D6;</div>
+        <h3 style="color:var(--purple);">레시피북</h3>
+        <div class="metaphor-eq">= Plugin</div>
+      </div>
+      <div class="metaphor-card anim-stagger-row">
+        <div class="metaphor-icon">&#x1F3EA;</div>
+        <h3 style="color:var(--blue);">서점</h3>
+        <div class="metaphor-eq">= Marketplace</div>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 10: 마켓플레이스 구조 다이어그램 -->
+<section class="slide" data-section="1" data-section-name="마켓플레이스 체험" data-section-time="20분" data-slide="10">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="text-align:center; margin-bottom:24px;">마켓플레이스 구조</h3>
+    <div class="diagram-container anim-scale">
+      <svg width="480" height="320" viewBox="0 0 480 320">
+        <!-- Outer: Marketplace -->
+        <rect x="20" y="20" width="440" height="280" rx="20" fill="rgba(96,165,250,0.06)" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="6,4"/>
+        <text x="40" y="52" fill="var(--blue)" font-size="14" font-weight="700" font-family="Pretendard, sans-serif">Marketplace (서점)</text>
+        <!-- Plugin A -->
+        <rect x="40" y="70" width="250" height="210" rx="14" fill="rgba(167,139,250,0.06)" stroke="var(--purple)" stroke-width="1.5"/>
+        <text x="60" y="98" fill="var(--purple)" font-size="13" font-weight="700" font-family="Pretendard, sans-serif">Plugin A</text>
+        <!-- Skills in A -->
+        <rect x="60" y="112" width="100" height="36" rx="8" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+        <text x="110" y="135" fill="var(--amber)" font-size="12" font-weight="600" text-anchor="middle" font-family="Pretendard, sans-serif">Skill 1</text>
+        <rect x="170" y="112" width="100" height="36" rx="8" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+        <text x="220" y="135" fill="var(--amber)" font-size="12" font-weight="600" text-anchor="middle" font-family="Pretendard, sans-serif">Skill 2</text>
+        <rect x="60" y="158" width="100" height="36" rx="8" fill="rgba(52,211,153,0.1)" stroke="rgba(52,211,153,0.3)" stroke-width="1"/>
+        <text x="110" y="181" fill="var(--green)" font-size="12" font-weight="600" text-anchor="middle" font-family="Pretendard, sans-serif">Agent 1</text>
+        <!-- 1:N label -->
+        <text x="165" y="230" fill="var(--text-secondary)" font-size="11" font-family="Pretendard, sans-serif" text-anchor="middle">1 Marketplace : N Plugins</text>
+        <text x="165" y="250" fill="var(--text-secondary)" font-size="11" font-family="Pretendard, sans-serif" text-anchor="middle">1 Plugin : N Skills + Agents</text>
+        <!-- Plugin B -->
+        <rect x="310" y="70" width="130" height="120" rx="14" fill="rgba(167,139,250,0.06)" stroke="var(--purple)" stroke-width="1.5"/>
+        <text x="330" y="98" fill="var(--purple)" font-size="13" font-weight="700" font-family="Pretendard, sans-serif">Plugin B</text>
+        <rect x="325" y="112" width="100" height="36" rx="8" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+        <text x="375" y="135" fill="var(--amber)" font-size="12" font-weight="600" text-anchor="middle" font-family="Pretendard, sans-serif">Skill 3</text>
+      </svg>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 11: 전사 마켓플레이스 -->
+<section class="slide" data-section="1" data-section-name="마켓플레이스 체험" data-section-time="20분" data-slide="11">
+  <div class="slide-inner">
+    <div class="repo-card anim-fade">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="var(--text-secondary)"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span style="color:var(--text-secondary); font-size:0.875rem;">GitHub Repository</span>
+      </div>
+      <div class="repo-name"><a href="https://github.com/myrealtrip/claude-code-plugins" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(167,139,250,0.4);">myrealtrip/claude-code-plugins</a></div>
+      <div class="repo-count">15개 플러그인 등록</div>
+      <div class="repo-list">
+        <span class="repo-tag">mrt-devkit</span>
+        <span class="repo-tag">techspec-builder</span>
+        <span class="repo-tag">strategy-builder</span>
+        <span class="repo-tag">workflow-utils</span>
+        <span class="repo-tag" style="background:rgba(255,255,255,0.04); color:var(--text-secondary); border-color:var(--glass-border);">... +11</span>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 12: 전사 마켓플레이스 구조 -->
+<section class="slide" data-section="1" data-section-name="마켓플레이스 체험" data-section-time="20분" data-slide="12">
+  <div class="slide-inner">
+    <div class="dir-tree anim-fade-x">
+      <a href="https://github.com/myrealtrip/claude-code-plugins" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;"><span class="folder">myrealtrip/claude-code-plugins/</span></a><br>
+      &#9500;&#9472;&#9472; <span class="folder">.claude-plugin/</span><br>
+      &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; <span class="file">marketplace.json</span> <span class="annotation">&larr; 마켓플레이스</span><br>
+      &#9500;&#9472;&#9472; <span class="folder highlight-line">mrt-devkit/</span> <span class="annotation">&larr; 플러그인 1</span><br>
+      &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; <span class="folder">.claude-plugin/</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; <span class="file">plugin.json</span><br>
+      &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; <span class="folder">skills/</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; <span class="folder">bootstrap/</span><span class="file">SKILL.md</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; <span class="folder">setup/</span><span class="file">SKILL.md</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; <span class="folder">visualize/</span><span class="file">SKILL.md</span><br>
+      &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; <span class="folder">agents/</span><br>
+      &#9474;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#9492;&#9472;&#9472; <span class="file">dev-guide.md</span><br>
+      &#9500;&#9472;&#9472; <span class="folder">techspec-builder/</span><br>
+      &#9492;&#9472;&#9472; <span class="file">... (15개)</span>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 13: 실습 A: mrt-devkit -->
+<section class="slide" data-section="1" data-section-name="마켓플레이스 체험" data-section-time="20분" data-slide="13">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:20px;">실습 A: mrt-devkit 설치</h3>
+    <div class="terminal anim-fade-x">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+      </div>
+      <div class="terminal-body">
+        <div class="step-label">Step 1: 마켓플레이스 추가</div>
+        <div class="cmd">claude plugin marketplace add <a href="https://github.com/myrealtrip/claude-code-plugins" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;border-bottom:1px dashed var(--green);">myrealtrip/claude-code-plugins</a></div>
+        <div class="step-label">Step 2: 플러그인 설치</div>
+        <div class="cmd">claude plugin install mrt-devkit</div>
+        <div class="step-label">Step 3: 확인</div>
+        <div class="cmd">claude plugin list</div>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 14: 실습 B: oh-my-claudecode -->
+<section class="slide" data-section="1" data-section-name="마켓플레이스 체험" data-section-time="20분" data-slide="14">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:20px;">실습 B: oh-my-claudecode 설치</h3>
+    <div class="terminal anim-fade-x">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+      </div>
+      <div class="terminal-body">
+        <div class="step-label">Step 1: 마켓플레이스 추가</div>
+        <div class="cmd">claude plugin marketplace add <a href="https://github.com/Yeachan-Heo/oh-my-claudecode" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;border-bottom:1px dashed var(--green);">Yeachan-Heo/oh-my-claudecode</a></div>
+        <div class="step-label">Step 2: 플러그인 설치</div>
+        <div class="cmd">claude plugin install oh-my-claudecode</div>
+        <div class="step-label">Step 3: 확인</div>
+        <div class="cmd">claude plugin list</div>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 15: 핵심 체감 -->
+<section class="slide" data-section="1" data-section-name="마켓플레이스 체험" data-section-time="20분" data-slide="15">
+  <div class="slide-inner" style="text-align:center;">
+    <h2 class="anim-title big-text">플러그인 2줄이면<br><span class="gradient-text">다른 사람이 만든 수십 개의<br>스킬과 에이전트를</span><br>바로 쓸 수 있다.</h2>
+  
+</div>
+</section>
+
+<!-- Slide 16: Tip 설치가 안 될 때 -->
+<section class="slide" data-section="1" data-section-name="마켓플레이스 체험" data-section-time="20분" data-slide="16">
+  <div class="slide-inner">
+    <div class="tip-card anim-fade">
+      <div class="tip-card-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        Tip: 설치가 안 될 때
+      </div>
+      <ul>
+        <li><span class="emphasis">"안 된다"를 감지:</span> plugin list에 없다, unknown command</li>
+        <li><span class="emphasis">의심 대상:</span> marketplace list로 확인, plugin list --available</li>
+        <li><span class="emphasis">검증 경로:</span> @claude-code-guide 멘션, <a href="https://docs.anthropic.com/en/docs/claude-code" target="_blank" rel="noopener" style="color:var(--purple);text-decoration:none;border-bottom:1px dashed var(--purple);">공식 문서</a> URL 제공</li>
+        <li><span class="emphasis">핵심:</span> Claude에게 그냥 물어보면 잘못된 답 가능. 공식 문서 기반으로!</li>
+      </ul>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 17: 퀴즈 -->
+<section class="slide" data-section="1" data-section-name="마켓플레이스 체험" data-section-time="20분" data-slide="17">
+  <div class="slide-inner">
+    <div class="quiz-card anim-fade">
+      <span class="quiz-label">Quiz</span>
+      <div class="quiz-question">마켓플레이스와 플러그인의 관계로 올바른 것은?</div>
+      <ul class="quiz-options">
+        <li>A) 1:1</li>
+        <li data-correct="true">B) 마켓 1 : 플러그인 N</li>
+        <li>C) 플러그인 1 : 마켓 N</li>
+      </ul>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <div class="quiz-answer-label">정답 (탭하여 확인)</div>
+        <p><strong>B</strong> — 서점에 여러 책. 하나의 마켓플레이스에 여러 플러그인이 등록됩니다.</p>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+
+<!-- ==================== SECTION 2: 플러그인 만들기 ==================== -->
+
+<!-- Slide 18: Section Title -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="18">
+  <div class="slide-inner" style="text-align:center;">
+    <span class="section-tag anim-fade">섹션 2</span>
+    <h1 class="anim-title gradient-purple" style="margin-bottom:12px;">플러그인 만들기</h1>
+    <p class="subtitle anim-fade">내 스킬을 패키징 &middot; 25분</p>
+  
+</div>
+</section>
+
+<!-- Slide 19: 소비자→생산자 전환 -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="19">
+  <div class="slide-inner" style="text-align:center;">
+    <div class="transition-visual anim-title">
+      <span class="from">소비자</span>
+      <span class="arrow">&#8594;</span>
+      <span class="to">생산자</span>
+    </div>
+    <p class="big-text-secondary anim-fade">Day 2에서 만든 스킬을<br>플러그인으로 묶어봅시다.</p>
+  
+</div>
+</section>
+
+<!-- Slide 20: plugin.json 구조 -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="20">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:20px;">plugin.json 구조</h3>
+    <div class="code-block-wrapper anim-fade-x">
+      <pre class="language-json"><code class="language-json">{
+  "name": "mrt-devkit",
+  "description": "MyRealTrip development harness...",
+  "version": "0.4.0",
+  "author": { "name": "gildong.hong@myrealtrip.com" },
+  "skills": [
+    "./skills/bootstrap/SKILL.md",
+    "./skills/setup/SKILL.md",
+    "./skills/visualize/SKILL.md"
+  ]
+}</code></pre>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 21: 핵심 필드 설명 -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="21">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:24px;">핵심 필드</h3>
+    <div class="pill-list">
+      <div class="pill-item anim-stagger-row">
+        <span class="pill-badge">name</span>
+        <span class="pill-desc">플러그인 이름 (설치 시 사용)</span>
+      </div>
+      <div class="pill-item anim-stagger-row">
+        <span class="pill-badge">description</span>
+        <span class="pill-desc">설명</span>
+      </div>
+      <div class="pill-item anim-stagger-row">
+        <span class="pill-badge">version</span>
+        <span class="pill-desc">버전</span>
+      </div>
+      <div class="pill-item anim-stagger-row">
+        <span class="pill-badge">skills</span>
+        <span class="pill-desc">스킬 파일 경로 목록</span>
+      </div>
+      <div class="pill-item anim-stagger-row">
+        <span class="pill-badge">agents</span>
+        <span class="pill-desc">에이전트 파일 경로 목록</span>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 22: Step 1: 플러그인 생성 -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="22">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:8px;">Step 1: 플러그인 생성</h3>
+    <p class="anim-fade" style="color:var(--text-secondary); margin-bottom:20px;">Claude에게 시키기</p>
+    <div class="prompt-block anim-fade-x">
+      "Day 2에서 만든 [스킬 이름] 스킬을 플러그인으로 패키징해줘.<br>
+      플러그인 이름은 'my-first-plugin'으로 하고,<br>
+      ~/my-first-plugin/ 디렉토리에 만들어줘."
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 23: 생성 결과 -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="23">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:20px;">생성 결과</h3>
+    <div style="display:grid; grid-template-columns:1fr; gap:16px;">
+      <div class="dir-tree anim-fade-x" style="margin-bottom:0;">
+        <span class="folder">~/my-first-plugin/</span><br>
+        &#9500;&#9472;&#9472; <span class="folder">.claude-plugin/</span><br>
+        &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; <span class="file highlight-line">plugin.json</span> <span class="annotation">&larr; 메타데이터</span><br>
+        &#9492;&#9472;&#9472; <span class="folder">skills/</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&#9492;&#9472;&#9472; <span class="folder">my-skill/</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9492;&#9472;&#9472; <span class="file highlight-line">SKILL.md</span> <span class="annotation">&larr; Day 2에서 만든 스킬</span>
+      </div>
+      <div class="code-block-wrapper anim-fade-x">
+        <pre class="language-json"><code class="language-json">{
+  "name": "my-first-plugin",
+  "description": "나의 첫 플러그인",
+  "version": "1.0.0",
+  "author": { "name": "gildong.hong@myrealtrip.com" },
+  "skills": [
+    "./skills/my-skill/SKILL.md"
+  ]
+}</code></pre>
+      </div>
+    </div>
+    <p class="anim-fade" style="color:var(--text-secondary); font-size:0.875rem; margin-top:12px; text-align:center;">슬라이드 20의 mrt-devkit과 같은 구조. skills 경로가 실제 파일 위치와 일치해야 합니다.</p>
+  
+</div>
+</section>
+
+<!-- Slide 24: Step 2: 로컬 테스트 -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="24">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:20px;">Step 2: 로컬 테스트</h3>
+    <div class="terminal anim-fade-x">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+      </div>
+      <div class="terminal-body">
+        <div class="cmd">claude --plugin-dir ~/my-first-plugin</div>
+      </div>
+    </div>
+    <ul class="checklist anim-fade">
+      <li>/my-skill 슬래시 커맨드가 보이는지 확인</li>
+      <li>실행하여 정상 동작 확인</li>
+    </ul>
+  
+</div>
+</section>
+
+<!-- Slide 25: Step 3: 검증 -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="25">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:20px;">Step 3: 검증</h3>
+    <div class="terminal anim-fade-x">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+      </div>
+      <div class="terminal-body">
+        <div class="cmd">claude plugin validate ~/my-first-plugin</div>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 26: 마켓플레이스 등록 흐름 -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="26">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="text-align:center; margin-bottom:24px;">마켓플레이스 등록 흐름</h3>
+    <div class="diagram-container anim-scale">
+      <svg width="400" height="340" viewBox="0 0 400 340">
+        <!-- Step 1 -->
+        <rect x="120" y="10" width="160" height="44" rx="12" fill="rgba(52,211,153,0.1)" stroke="var(--green)" stroke-width="1.5"/>
+        <text x="200" y="38" text-anchor="middle" fill="var(--green)" font-size="14" font-weight="600" font-family="Pretendard, sans-serif">로컬 테스트 완료</text>
+        <!-- Arrow -->
+        <line x1="200" y1="54" x2="200" y2="90" stroke="var(--text-secondary)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <!-- Step 2 -->
+        <rect x="120" y="90" width="160" height="44" rx="12" fill="rgba(96,165,250,0.1)" stroke="var(--blue)" stroke-width="1.5"/>
+        <text x="200" y="118" text-anchor="middle" fill="var(--blue)" font-size="14" font-weight="600" font-family="Pretendard, sans-serif">GitHub에 Push</text>
+        <!-- Fork arrows -->
+        <line x1="200" y1="134" x2="200" y2="170" stroke="var(--text-secondary)" stroke-width="1.5"/>
+        <line x1="200" y1="170" x2="100" y2="200" stroke="var(--text-secondary)" stroke-width="1.5"/>
+        <line x1="200" y1="170" x2="300" y2="200" stroke="var(--text-secondary)" stroke-width="1.5"/>
+        <!-- Path 1 -->
+        <rect x="20" y="200" width="160" height="56" rx="12" fill="rgba(167,139,250,0.08)" stroke="var(--purple)" stroke-width="1.5"/>
+        <text x="100" y="222" text-anchor="middle" fill="var(--purple)" font-size="11" font-weight="600" font-family="Pretendard, sans-serif">방법 1</text>
+        <text x="100" y="242" text-anchor="middle" fill="var(--text-secondary)" font-size="11" font-family="Pretendard, sans-serif">전사 마켓 repo에 PR</text>
+        <!-- Path 2 -->
+        <rect x="220" y="200" width="160" height="56" rx="12" fill="rgba(167,139,250,0.08)" stroke="var(--purple)" stroke-width="1.5"/>
+        <text x="300" y="222" text-anchor="middle" fill="var(--purple)" font-size="11" font-weight="600" font-family="Pretendard, sans-serif">방법 2</text>
+        <text x="300" y="242" text-anchor="middle" fill="var(--text-secondary)" font-size="11" font-family="Pretendard, sans-serif">자기 repo를 마켓으로</text>
+        <!-- Final -->
+        <line x1="100" y1="256" x2="200" y2="290" stroke="var(--text-secondary)" stroke-width="1.5"/>
+        <line x1="300" y1="256" x2="200" y2="290" stroke="var(--text-secondary)" stroke-width="1.5"/>
+        <rect x="120" y="280" width="160" height="44" rx="12" fill="rgba(251,191,36,0.1)" stroke="var(--amber)" stroke-width="1.5"/>
+        <text x="200" y="308" text-anchor="middle" fill="var(--amber)" font-size="14" font-weight="600" font-family="Pretendard, sans-serif">동료가 설치!</text>
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--text-secondary)"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 27: Tip 트러블슈팅 -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="27">
+  <div class="slide-inner">
+    <div class="tip-card anim-fade">
+      <div class="tip-card-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+        Tip: 트러블슈팅 사고 흐름
+      </div>
+      <ul>
+        <li><span class="emphasis">스킬 단독 OK</span> &#8594; 플러그인으로 감싼 후 안 됨 &#8594; 패키징 과정에 문제</li>
+        <li><span class="emphasis">의심 1:</span> plugin.json이 존재하는가?</li>
+        <li><span class="emphasis">의심 2:</span> skills 경로가 맞는가?</li>
+        <li><span class="emphasis">의심 3:</span> SKILL.md 위치가 올바른가?</li>
+      </ul>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 28: Tip: claude-code-guide -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="28">
+  <div class="slide-inner">
+    <div class="tip-card anim-fade" style="background:rgba(167,139,250,0.05); border-color:rgba(167,139,250,0.2);">
+      <div class="tip-card-header" style="color:var(--purple);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        그래도 안 되면?
+      </div>
+      <ul>
+        <li><span class="emphasis">@claude-code-guide를 멘션하며 질문</span></li>
+        <li>일반 질문보다 훨씬 정확한 답을 얻을 수 있습니다</li>
+      </ul>
+      <div class="terminal anim-fade-x" style="margin-top:16px;">
+        <div class="terminal-header">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+        </div>
+        <div class="terminal-body" style="font-size:0.8125rem;">
+          <span style="color:var(--text-secondary);">@claude-code-guide</span> <span style="color:var(--text);">plugin.json의 skills 경로 형식이 어떻게 되나요?</span>
+        </div>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 29: Tip: 메타 지식 -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="29">
+  <div class="slide-inner">
+    <div class="quote anim-fade" style="font-size:clamp(1.125rem,3vw,1.5rem);">
+      이 도구를 최적으로 쓰고 싶다면,<br>도구의 구조는 알아야 한다.
+    </div>
+    <ul class="key-points anim-fade" style="margin-top:32px;">
+      <li>디렉토리 구조</li>
+      <li>핵심 파일의 역할</li>
+      <li>문제 시 어디를 보는지</li>
+    </ul>
+    <p class="note-text anim-fade">코드를 쓰는 능력이 아니라, 도구를 이해하는 능력</p>
+  
+</div>
+</section>
+
+<!-- Slide 30: 퀴즈 -->
+<section class="slide" data-section="2" data-section-name="플러그인 만들기" data-section-time="25분" data-slide="30">
+  <div class="slide-inner">
+    <div class="quiz-card anim-fade">
+      <span class="quiz-label">Quiz</span>
+      <div class="quiz-question">로컬에서 만든 플러그인을 테스트하려면?</div>
+      <ul class="quiz-options">
+        <li>A) claude plugin install ~/my-plugin</li>
+        <li data-correct="true">B) claude --plugin-dir ~/my-plugin</li>
+        <li>C) claude plugin test ~/my-plugin</li>
+      </ul>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <div class="quiz-answer-label">정답 (탭하여 확인)</div>
+        <p><strong>B</strong> — --plugin-dir 플래그로 로컬 디렉토리를 직접 지정합니다.</p>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+
+<!-- ==================== SECTION 3: 무엇을 만들 것인가 ==================== -->
+
+<!-- Slide 31: Section Title -->
+<section class="slide" data-section="3" data-section-name="무엇을 만들 것인가" data-section-time="10분" data-slide="31">
+  <div class="slide-inner" style="text-align:center;">
+    <span class="section-tag anim-fade">섹션 3</span>
+    <h1 class="anim-title gradient-purple" style="margin-bottom:12px;">무엇을 만들 것인가</h1>
+    <p class="subtitle anim-fade">관점 전환 &middot; 10분</p>
+  
+</div>
+</section>
+
+<!-- Slide 32: 핵심 질문 -->
+<section class="slide" data-section="3" data-section-name="무엇을 만들 것인가" data-section-time="10분" data-slide="32">
+  <div class="slide-inner" style="text-align:center;">
+    <h2 class="anim-title big-text">당신이 만든 시스템은<br>누가 쓸 건가요?</h2>
+  
+</div>
+</section>
+
+<!-- Slide 33: 분기 다이어그램 -->
+<section class="slide" data-section="3" data-section-name="무엇을 만들 것인가" data-section-time="10분" data-slide="33">
+  <div class="slide-inner">
+    <div class="diagram-container anim-scale">
+      <svg width="520" height="380" viewBox="0 0 520 380" style="max-width:100%;">
+        <!-- Left: What I Build box -->
+        <rect x="10" y="10" width="240" height="360" rx="16" fill="rgba(167,139,250,0.05)" stroke="rgba(167,139,250,0.3)" stroke-width="1.5"/>
+        <text x="130" y="40" text-anchor="middle" fill="var(--purple)" font-size="15" font-weight="700" font-family="Pretendard, sans-serif">What I Build</text>
+
+        <!-- MCP Server (AI Agent uses) -->
+        <rect x="30" y="60" width="200" height="48" rx="10" fill="rgba(52,211,153,0.1)" stroke="var(--green)" stroke-width="1.5"/>
+        <text x="130" y="89" text-anchor="middle" fill="var(--green)" font-size="13" font-weight="600" font-family="Pretendard, sans-serif">MCP Server</text>
+
+        <!-- Skill / Agents (AI Agent uses) -->
+        <rect x="30" y="124" width="200" height="48" rx="10" fill="rgba(52,211,153,0.1)" stroke="var(--green)" stroke-width="1.5"/>
+        <text x="130" y="148" text-anchor="middle" fill="var(--green)" font-size="13" font-weight="600" font-family="Pretendard, sans-serif">Skill / Agents</text>
+        <text x="130" y="164" text-anchor="middle" fill="var(--text-secondary)" font-size="11" font-family="Pretendard, sans-serif">(plugins)</text>
+
+        <!-- Divider line -->
+        <line x1="40" y1="192" x2="220" y2="192" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="4,4"/>
+
+        <!-- Web Service (Human uses) -->
+        <rect x="30" y="210" width="200" height="48" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="130" y="239" text-anchor="middle" fill="var(--text-secondary)" font-size="13" font-weight="600" font-family="Pretendard, sans-serif">Web Service</text>
+
+        <!-- Slack Bot (Human uses) -->
+        <rect x="30" y="274" width="200" height="48" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="130" y="303" text-anchor="middle" fill="var(--text-secondary)" font-size="13" font-weight="600" font-family="Pretendard, sans-serif">Slack Bot</text>
+
+        <!-- Right: AI Agent box -->
+        <rect x="310" y="55" width="190" height="120" rx="14" fill="rgba(52,211,153,0.08)" stroke="var(--green)" stroke-width="1.5"/>
+        <text x="405" y="100" text-anchor="middle" fill="var(--green)" font-size="13" font-weight="700" font-family="Pretendard, sans-serif">AI Agent</text>
+        <text x="405" y="120" text-anchor="middle" fill="var(--green)" font-size="11" font-family="Pretendard, sans-serif">(Claude Code)</text>
+
+        <!-- Right: Human box -->
+        <rect x="310" y="220" width="190" height="100" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="405" y="275" text-anchor="middle" fill="var(--text-secondary)" font-size="13" font-weight="700" font-family="Pretendard, sans-serif">Human</text>
+
+        <!-- Vertical connection: Human → AI Agent -->
+        <line x1="405" y1="220" x2="405" y2="175" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+        <polygon points="405,177 400,185 410,185" fill="rgba(255,255,255,0.25)"/>
+
+        <!-- Arrows: AI Agent → MCP Server -->
+        <line x1="310" y1="84" x2="232" y2="84" stroke="var(--green)" stroke-width="1.5"/>
+        <polygon points="234,84 242,79 242,89" fill="var(--green)"/>
+
+        <!-- Arrows: AI Agent → Skill/Agents -->
+        <line x1="310" y1="148" x2="232" y2="148" stroke="var(--green)" stroke-width="1.5"/>
+        <polygon points="234,148 242,143 242,153" fill="var(--green)"/>
+
+        <!-- Arrows: Human → Web Service -->
+        <line x1="310" y1="252" x2="232" y2="234" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+        <polygon points="234,234 242,229 242,239" fill="rgba(255,255,255,0.2)"/>
+
+        <!-- Arrows: Human → Slack Bot -->
+        <line x1="310" y1="270" x2="232" y2="298" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+        <polygon points="234,298 242,293 242,303" fill="rgba(255,255,255,0.2)"/>
+
+        <!-- Labels -->
+        <text x="130" y="348" text-anchor="middle" fill="var(--green)" font-size="11" font-weight="600" font-family="Pretendard, sans-serif">↑ Expansion continues</text>
+        <text x="130" y="362" text-anchor="middle" fill="var(--text-secondary)" font-size="11" font-family="Pretendard, sans-serif" opacity="0.5">↓ Expansion stops here</text>
+      </svg>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 34: 분기점 표 -->
+<section class="slide" data-section="3" data-section-name="무엇을 만들 것인가" data-section-time="10분" data-slide="34">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:20px;">언제 무엇을 만들까?</h3>
+    <table class="data-table">
+      <tbody>
+        <tr class="anim-stagger-row"><td>더 이상 AI 확장 불필요?</td><td style="text-align:right;">GUI &#10003;</td></tr>
+        <tr class="anim-stagger-row"><td>사람만 쓸 최종 제품?</td><td style="text-align:right;">GUI &#10003;</td></tr>
+        <tr class="anim-stagger-row"><td>다른 AI 에이전트가 호출?</td><td style="text-align:right;color:var(--green);font-weight:700;">Skill &#10003;</td></tr>
+        <tr class="anim-stagger-row"><td>에이전트 체이닝 확장?</td><td style="text-align:right;color:var(--green);font-weight:700;">Skill &#10003;</td></tr>
+      </tbody>
+    </table>
+  
+</div>
+</section>
+
+<!-- Slide 35: 핵심 메시지 -->
+<section class="slide" data-section="3" data-section-name="무엇을 만들 것인가" data-section-time="10분" data-slide="35">
+  <div class="slide-inner">
+    <div class="quote anim-fade" style="font-size:clamp(1.0625rem,3vw,1.375rem);">
+      만약 딱 하나만 만들 수 있다면 — GUI가 아니라 Skill을 만드세요.<br><br>
+      <span style="font-size:0.9em; color:var(--text-secondary);">
+        Skill을 먼저 만들면, 그 위에 GUI든 Slack bot이든 얹을 수 있습니다.<br>
+        하지만 GUI를 먼저 만들면, AI 에이전트가 쓰기 어렵습니다.
+      </span>
+    </div>
+  
+</div>
+</section>
+
+
+<!-- ==================== SECTION 4: Agent SDK 데모 ==================== -->
+
+<!-- Slide 36: Section Title -->
+<section class="slide" data-section="4" data-section-name="Agent SDK 데모" data-section-time="15분" data-slide="36">
+  <div class="slide-inner" style="text-align:center;">
+    <span class="section-tag anim-fade">섹션 4</span>
+    <h1 class="anim-title gradient-purple" style="margin-bottom:12px;">Agent SDK 데모</h1>
+    <p class="subtitle anim-fade">mari로 보는 확장 &middot; 15분</p>
+  
+</div>
+</section>
+
+<!-- Slide 37: Agent SDK란? -->
+<section class="slide" data-section="4" data-section-name="Agent SDK 데모" data-section-time="15분" data-slide="37">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:24px;">Agent SDK란?</h3>
+    <ul class="key-points">
+      <li class="anim-stagger-row">Claude Code의 핵심 엔진을 프로그래밍 가능한 SDK로</li>
+      <li class="anim-stagger-row">Skill, Agent, MCP를 그대로 사용 가능</li>
+      <li class="anim-stagger-row">복사 붙여넣기로 다른 환경에 옮길 수 있음</li>
+    </ul>
+  
+</div>
+</section>
+
+<!-- Slide 37.5: Anthropic API vs Agent SDK -->
+<section class="slide" data-section="4" data-section-name="Agent SDK 데모" data-section-time="15분" data-slide="38">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:8px;">API vs Agent SDK</h3>
+    <p class="anim-fade" style="color:var(--text-secondary); margin-bottom:24px; font-size:0.9375rem;">같은 두뇌, 다른 몸</p>
+    <div class="comparison-table anim-fade">
+      <div class="comparison-col do" style="border-color:rgba(96,165,250,0.3); background:rgba(96,165,250,0.04);">
+        <h4 style="color:var(--blue);">Anthropic API</h4>
+        <ul>
+          <li style="opacity:1; color:var(--text);">Claude의 <strong>두뇌만</strong> 빌려오는 것</li>
+          <li style="opacity:1; color:var(--text-secondary);">대화 흐름, 도구 호출, 에러 처리를<br><strong>직접 만들어야</strong> 합니다</li>
+          <li style="opacity:1; color:var(--text-secondary);">비유: 엔진만 사서 자동차를 직접 조립</li>
+          <li style="opacity:1; color:var(--pink);">💳 API Key 필수, 종량제 과금</li>
+        </ul>
+      </div>
+      <div class="comparison-col do" style="border-color:rgba(52,211,153,0.3); background:rgba(52,211,153,0.04);">
+        <h4 style="color:var(--green);">Agent SDK</h4>
+        <ul>
+          <li style="opacity:1; color:var(--text);">Claude Code의 <strong>완성된 몸</strong>을 가져오는 것</li>
+          <li style="opacity:1; color:var(--text-secondary);">대화 흐름, 도구, Skill, Agent 전부<br><strong>이미 만들어져</strong> 있습니다</li>
+          <li style="opacity:1; color:var(--text-secondary);">비유: 완성된 자동차를 가져다 색만 칠하기</li>
+          <li style="opacity:1; color:var(--green);">✓ Claude 구독료로 사용 가능</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anim-fade" style="margin-top:20px; text-align:center;">
+      <p style="font-size:0.875rem; color:var(--text-secondary);">Claude Code = <strong style="color:var(--purple);">50만 줄</strong>이 넘는 코드로 만들어진 완성품</p>
+      <p style="font-size:0.8125rem; color:var(--text-secondary); margin-top:4px; opacity:0.7;">Agent SDK를 쓰면, 이 50만 줄을 그대로 가져다 쓸 수 있습니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 38 (was): Copy/Paste 다이어그램 -->
+<section class="slide" data-section="4" data-section-name="Agent SDK 데모" data-section-time="15분" data-slide="39">
+  <div class="slide-inner">
+    <div class="copypaste-grid anim-scale">
+      <div class="copypaste-box">
+        <h4 style="color:var(--blue);">Claude Code<br><span style="font-size:0.75em; color:var(--text-secondary);">(Terminal)</span></h4>
+        <div class="inner-items">
+          <div class="inner-item">Skill</div>
+          <div class="inner-item">Agent</div>
+          <div class="inner-item">MCP</div>
+        </div>
+      </div>
+      <div class="copypaste-arrow">copy &#8594; paste</div>
+      <div class="copypaste-box" style="border-color: rgba(52,211,153,0.3);">
+        <h4 style="color:var(--green);">Agent SDK App<br><span style="font-size:0.75em; color:var(--text-secondary);">(Slack, Web...)</span></h4>
+        <div class="inner-items">
+          <div class="inner-item" style="background:rgba(52,211,153,0.1); color:var(--green);">Skill</div>
+          <div class="inner-item" style="background:rgba(52,211,153,0.1); color:var(--green);">Agent</div>
+          <div class="inner-item" style="background:rgba(52,211,153,0.1); color:var(--green);">MCP</div>
+        </div>
+      </div>
+    </div>
+    <p class="note-text anim-fade">Same Skills, Different Surface</p>
+  
+</div>
+</section>
+
+<!-- Slide 39: mari 소개 -->
+<section class="slide" data-section="4" data-section-name="Agent SDK 데모" data-section-time="15분" data-slide="40">
+  <div class="slide-inner">
+    <div class="mari-card anim-fade">
+      <div class="mari-name">mari</div>
+      <ul>
+        <li>임수진님이 Agent SDK로 만든 Slack bot</li>
+        <li>Skill을 그대로 가져다 Slack chatbot화</li>
+        <li>Skill이 핵심이고, Slack은 하나의 출구(surface)일 뿐</li>
+      </ul>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 40: 참여 체험 -->
+<section class="slide" data-section="4" data-section-name="Agent SDK 데모" data-section-time="15분" data-slide="41">
+  <div class="slide-inner">
+    <div class="participation-box anim-fade">
+      <p style="font-size:1.125rem; margin-bottom:12px;">모두 Slack에 접속해주세요</p>
+      <div class="channel-name"><a href="https://myrealtrip.slack.com/channels/01_협업_ai_lab" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">#01_협업_ai_lab</a></div>
+      <p style="color:var(--text-secondary); margin-top:16px; font-size:1rem;">mari에게 직접 메시지를 보내봅시다.</p>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 41: Agent SDK 코드 -->
+<section class="slide" data-section="4" data-section-name="Agent SDK 데모" data-section-time="15분" data-slide="42">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:20px;">Agent SDK 코드</h3>
+    <div class="code-block-wrapper anim-fade-x">
+      <pre class="language-typescript"><code class="language-typescript">import { query } from "<a href="https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk" target="_blank" rel="noopener" style="color:inherit;text-underline-offset:3px;text-decoration:underline;text-decoration-color:rgba(167,139,250,0.4);">@anthropic-ai/claude-agent-sdk</a>";
+
+for await (const message of query({
+  prompt: "사용자의 요청",
+  options: {
+    allowedTools: ["Read", "Edit", "Bash", "Skill"],
+    permissionMode: "acceptEdits"
+  }
+})) {
+  sendToSlack(message);
+}</code></pre>
+    </div>
+    <p class="note-text anim-fade">Agent SDK 자체는 소프트웨어 개발 영역.<br>핵심은 Skill을 잘 만들면 어디든 옮길 수 있다는 것.</p>
+  
+</div>
+</section>
+
+
+<!-- ==================== SECTION 5: Wrap-up ==================== -->
+
+<!-- Slide 42: Section Title -->
+<section class="slide" data-section="5" data-section-name="Wrap-up" data-section-time="15분" data-slide="43">
+  <div class="slide-inner" style="text-align:center;">
+    <span class="section-tag anim-fade">섹션 5</span>
+    <h1 class="anim-title gradient-purple" style="margin-bottom:12px;">4일의 여정을 마치며</h1>
+    <p class="subtitle anim-fade">15분</p>
+  
+</div>
+</section>
+
+<!-- Slide 43: Before -->
+<section class="slide" data-section="5" data-section-name="Wrap-up" data-section-time="15분" data-slide="44">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="text-align:center; margin-bottom:8px; color:var(--text-secondary);">1달 전</h3>
+    <div class="dir-tree anim-fade-x" style="max-width:360px; margin:0 auto;">
+      <span class="folder">~/.claude/</span><br>
+      &#9492;&#9472;&#9472; <span style="color:var(--text-secondary); font-style:italic;">(비어있음)</span>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 44: After -->
+<section class="slide" data-section="5" data-section-name="Wrap-up" data-section-time="15분" data-slide="45">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="text-align:center; margin-bottom:8px; color:var(--green);">지금</h3>
+    <div style="display:grid; grid-template-columns:1fr; gap:16px; max-width:520px; margin:0 auto;">
+      <div class="dir-tree glow-box anim-fade-x" style="margin-bottom:0;">
+        <span class="folder">~/.claude/</span><br>
+        &#9500;&#9472;&#9472; <span class="file">CLAUDE.md</span> <span class="annotation">&larr; Day 1</span><br>
+        &#9500;&#9472;&#9472; <span class="folder">memory/</span> <span class="annotation">&larr; Day 1</span><br>
+        &#9500;&#9472;&#9472; <span class="folder">skills/</span> <span class="annotation">&larr; Day 2</span><br>
+        &#9492;&#9472;&#9472; <span class="folder">agents/</span> <span class="annotation">&larr; Day 3</span>
+      </div>
+      <div class="dir-tree anim-fade-x" style="margin-bottom:0; border-color:rgba(167,139,250,0.3);">
+        <span class="folder highlight-line">~/my-first-plugin/</span> <span class="annotation">&larr; Day 4: 내가 만든 플러그인</span><br>
+        &#9500;&#9472;&#9472; <span class="folder">.claude-plugin/</span><br>
+        &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; <span class="file">plugin.json</span><br>
+        &#9492;&#9472;&#9472; <span class="folder">skills/</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&#9492;&#9472;&#9472; <span class="folder">my-skill/</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9492;&#9472;&#9472; <span class="file">SKILL.md</span>
+      </div>
+      <div class="dir-tree anim-fade-x" style="margin-bottom:0; border-color:rgba(52,211,153,0.3);">
+        <a href="https://github.com/myrealtrip/claude-code-plugins" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;"><span class="folder" style="color:var(--green);">github.com/myrealtrip/claude-code-plugins/</span></a> <span class="annotation">&larr; 전사 마켓에 배포!</span><br>
+        &#9500;&#9472;&#9472; <span class="folder">mrt-devkit/</span><br>
+        &#9500;&#9472;&#9472; <span class="folder">techspec-builder/</span><br>
+        &#9500;&#9472;&#9472; <span class="folder" style="color:var(--text-secondary);">...</span><br>
+        &#9492;&#9472;&#9472; <span class="folder highlight-line">my-first-plugin/</span> <span class="annotation">&larr; 여기에 내 플러그인도!</span>
+      </div>
+    </div>
+    <p class="note-text anim-fade" style="margin-top:16px;">나의 AI 환경 + 내가 만든 플러그인 + 마켓플레이스에 배포</p>
+  
+</div>
+</section>
+
+<!-- Slide 45: 4일 여정 표 -->
+<section class="slide" data-section="5" data-section-name="Wrap-up" data-section-time="15분" data-slide="46">
+  <div class="slide-inner">
+    <table class="data-table">
+      <thead>
+        <tr><th></th><th>질문</th><th>도구</th><th>결과</th></tr>
+      </thead>
+      <tbody>
+        <tr class="anim-stagger-row">
+          <td style="color:var(--blue); font-weight:700;">Day 1</td>
+          <td>Claude가 나를 알게 하려면?</td>
+          <td>CLAUDE.md + Memory</td>
+          <td>나만의 세팅</td>
+        </tr>
+        <tr class="anim-stagger-row">
+          <td style="color:var(--amber); font-weight:700;">Day 2</td>
+          <td>반복 업무를 자동화하려면?</td>
+          <td>Skill 만들기</td>
+          <td>나만의 워크플로우</td>
+        </tr>
+        <tr class="anim-stagger-row">
+          <td style="color:var(--green); font-weight:700;">Day 3</td>
+          <td>혼자 못하는 일을 시키려면?</td>
+          <td>Agent + 병렬</td>
+          <td>나만의 AI 팀</td>
+        </tr>
+        <tr class="anim-stagger-row">
+          <td style="color:var(--purple); font-weight:700;">Day 4</td>
+          <td>이걸 동료도 쓰게 하려면?</td>
+          <td>Plugin + SDK</td>
+          <td>다른 사람도 쓰는 도구</td>
+        </tr>
+      </tbody>
+    </table>
+  
+</div>
+</section>
+
+<!-- Slide 46: 성장 경로 -->
+<section class="slide" data-section="5" data-section-name="Wrap-up" data-section-time="15분" data-slide="47">
+  <div class="slide-inner">
+    <div class="flow-horizontal anim-scale">
+      <div class="flow-step">
+        <div class="flow-label" style="color:var(--blue);">나를 위한 세팅</div>
+        <div class="flow-sub">(개인)</div>
+      </div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step">
+        <div class="flow-label" style="color:var(--amber);">나의 워크플로우</div>
+        <div class="flow-sub">(자동화)</div>
+      </div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step">
+        <div class="flow-label" style="color:var(--green);">나의 AI 팀</div>
+        <div class="flow-sub">(위임)</div>
+      </div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step">
+        <div class="flow-label" style="color:var(--purple);">모두의 도구</div>
+        <div class="flow-sub">(확산)</div>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 47: 액션 플랜 -->
+<section class="slide" data-section="5" data-section-name="Wrap-up" data-section-time="15분" data-slide="48">
+  <div class="slide-inner">
+    <h3 class="anim-fade" style="margin-bottom:20px;">액션 플랜</h3>
+    <table class="action-table">
+      <tr class="anim-stagger-row"><td>이번 주</td><td>CLAUDE.md에 규칙 3가지, 업무 1개를 Skill로</td></tr>
+      <tr class="anim-stagger-row"><td>2주 내</td><td>팀원에게 공유, 피드백 받기</td></tr>
+      <tr class="anim-stagger-row"><td>1개월</td><td>전사 마켓플레이스에 PR</td></tr>
+      <tr class="anim-stagger-row"><td>그 이후</td><td>"AI 에이전트가 쓸 수 있는 도구" 관점</td></tr>
+    </table>
+  
+</div>
+</section>
+
+<!-- Slide 48: 마무리 메시지 -->
+<section class="slide" data-section="5" data-section-name="Wrap-up" data-section-time="15분" data-slide="49">
+  <div class="slide-inner" style="text-align:center;">
+    <h2 class="anim-title">
+      <span class="gradient-text" style="font-size:clamp(1.25rem,4vw,2rem); display:block; margin-bottom:24px;">여러분은 이제<br>AI 에이전트의 도구를 만드는 사람입니다.</span>
+    </h2>
+    <p class="anim-fade big-text-secondary" style="max-width:500px; margin:0 auto;">
+      여러분이 만든 하나의 스킬이,<br>동료의 하루를 바꿀 수 있습니다.
+    </p>
+    <p class="anim-fade" style="color:var(--purple); font-weight:600; margin-top:24px; font-size:1.125rem;">만들고, 공유하고, 확장하세요.</p>
+  
+</div>
+</section>
+
+<!-- Slide 49: 퀴즈 1 -->
+<section class="slide" data-section="5" data-section-name="Wrap-up" data-section-time="15분" data-slide="50">
+  <div class="slide-inner">
+    <div class="quiz-card anim-fade">
+      <span class="quiz-label">Quiz 1</span>
+      <div class="quiz-question">플러그인을 로컬에서 테스트하는 방법은?</div>
+      <ul class="quiz-options">
+        <li>A) claude plugin test</li>
+        <li data-correct="true">B) claude --plugin-dir</li>
+        <li>C) claude plugin install --local</li>
+      </ul>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <div class="quiz-answer-label">정답 (탭하여 확인)</div>
+        <p><strong>B</strong> — --plugin-dir 플래그로 로컬 디렉토리를 지정합니다.</p>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 50: 퀴즈 2 -->
+<section class="slide" data-section="5" data-section-name="Wrap-up" data-section-time="15분" data-slide="51">
+  <div class="slide-inner">
+    <div class="quiz-card anim-fade">
+      <span class="quiz-label">Quiz 2</span>
+      <div class="quiz-question">4일간 배운 것의 올바른 순서는?</div>
+      <ul class="quiz-options">
+        <li>A) Skill &#8594; CLAUDE.md &#8594; Plugin &#8594; Agent</li>
+        <li data-correct="true">B) CLAUDE.md &#8594; Skill &#8594; Agent &#8594; Plugin</li>
+        <li>C) CLAUDE.md &#8594; Agent &#8594; Skill &#8594; Plugin</li>
+      </ul>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <div class="quiz-answer-label">정답 (탭하여 확인)</div>
+        <p><strong>B</strong> — 세팅 &#8594; 자동화 &#8594; 위임 &#8594; 확산</p>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 51: 퀴즈 3 -->
+<section class="slide" data-section="5" data-section-name="Wrap-up" data-section-time="15분" data-slide="52">
+  <div class="slide-inner">
+    <div class="quiz-card anim-fade">
+      <span class="quiz-label">Quiz 3</span>
+      <div class="quiz-question">"딱 하나만 만들 수 있다면" 우선순위는?</div>
+      <ul class="quiz-options">
+        <li>A) 웹 대시보드</li>
+        <li>B) Slack bot</li>
+        <li data-correct="true">C) Skill</li>
+      </ul>
+      <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+        <div class="quiz-answer-label">정답 (탭하여 확인)</div>
+        <p><strong>C</strong> — Skill을 먼저 만들면, 그 위에 GUI든 Bot이든 얹을 수 있다.</p>
+      </div>
+    </div>
+  
+</div>
+</section>
+
+<!-- Slide 52: End -->
+<section class="slide" data-section="5" data-section-name="Wrap-up" data-section-time="15분" data-slide="53">
+  <div class="slide-inner" style="text-align:center;">
+    <h1 class="end-text anim-title gradient-text">감사합니다</h1>
+    <p class="end-sub anim-fade">Claude Code Camp &middot; Day 4</p>
+  
+</div>
+</section>
+
+</div><!-- /scroll-container -->
+
+<!-- Floating glass button -->
+<div id="floating-btn" onclick="toggleToc()">
+  <div id="floating-slide-num">1 / 52</div>
+  <div id="floating-section-info">Recap &middot; 5분</div>
+</div>
+
+<!-- TOC overlay -->
+<div id="toc-overlay" onclick="closeTocOutside(event)">
+  <div id="toc-panel">
+    <h3>목차</h3>
+    <div class="toc-item" data-target="1" onclick="jumpToSlide(1)">
+      <span class="toc-item-name">Recap + 오늘의 여정</span>
+      <span class="toc-item-meta">Slide 1-7 &middot; 5분</span>
+    </div>
+    <div class="toc-item" data-target="8" onclick="jumpToSlide(8)">
+      <span class="toc-item-name">1. 마켓플레이스 체험</span>
+      <span class="toc-item-meta">Slide 8-17 &middot; 20분</span>
+    </div>
+    <div class="toc-item" data-target="18" onclick="jumpToSlide(18)">
+      <span class="toc-item-name">2. 플러그인 만들기</span>
+      <span class="toc-item-meta">Slide 18-30 &middot; 25분</span>
+    </div>
+    <div class="toc-item" data-target="31" onclick="jumpToSlide(31)">
+      <span class="toc-item-name">3. 무엇을 만들 것인가</span>
+      <span class="toc-item-meta">Slide 31-35 &middot; 10분</span>
+    </div>
+    <div class="toc-item" data-target="36" onclick="jumpToSlide(36)">
+      <span class="toc-item-name">4. Agent SDK 데모</span>
+      <span class="toc-item-meta">Slide 36-42 &middot; 15분</span>
+    </div>
+    <div class="toc-item" data-target="43" onclick="jumpToSlide(43)">
+      <span class="toc-item-name">5. Wrap-up</span>
+      <span class="toc-item-meta">Slide 43-53 &middot; 15분</span>
+    </div>
+    <button id="toc-close" onclick="closeToc()">닫기</button>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script>
+(function() {
+  const container = document.getElementById('scroll-container');
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+  const progressBar = document.getElementById('progress-bar');
+  const floatingSlideNum = document.getElementById('floating-slide-num');
+  const floatingSectionInfo = document.getElementById('floating-section-info');
+  let currentSlide = 0;
+
+  // Register GSAP
+  gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.defaults({ scroller: container });
+
+  // Animate elements
+  slides.forEach((slide, i) => {
+    // Fade up
+    slide.querySelectorAll('.anim-fade').forEach(el => {
+      gsap.to(el, {
+        opacity: 1, y: 0, duration: 0.7, ease: 'power2.out',
+        scrollTrigger: { trigger: slide, start: 'top 80%', end: 'top 20%', toggleActions: 'play none none reverse' }
+      });
+    });
+
+    // Fade X
+    slide.querySelectorAll('.anim-fade-x').forEach(el => {
+      gsap.to(el, {
+        opacity: 1, x: 0, duration: 0.7, ease: 'power2.out',
+        scrollTrigger: { trigger: slide, start: 'top 80%', toggleActions: 'play none none reverse' }
+      });
+    });
+
+    // Scale
+    slide.querySelectorAll('.anim-scale').forEach(el => {
+      gsap.to(el, {
+        opacity: 1, scale: 1, duration: 0.8, ease: 'power2.out',
+        scrollTrigger: { trigger: slide, start: 'top 80%', toggleActions: 'play none none reverse' }
+      });
+    });
+
+    // Stagger rows
+    const staggerEls = slide.querySelectorAll('.anim-stagger-row');
+    if (staggerEls.length) {
+      gsap.to(staggerEls, {
+        opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: 'power2.out',
+        scrollTrigger: { trigger: slide, start: 'top 80%', toggleActions: 'play none none reverse' }
+      });
+    }
+
+    // Title
+    slide.querySelectorAll('.anim-title').forEach(el => {
+      gsap.to(el, {
+        opacity: 1, scale: 1, y: 0, duration: 0.9, ease: 'power3.out',
+        scrollTrigger: { trigger: slide, start: 'top 80%', toggleActions: 'play none none reverse' }
+      });
+    });
+  });
+
+  // Intersection Observer for floating button
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+        const slide = entry.target;
+        const slideNum = parseInt(slide.dataset.slide);
+        const sectionName = slide.dataset.sectionName || '';
+        const sectionTime = slide.dataset.sectionTime || '';
+        currentSlide = slideNum;
+        floatingSlideNum.textContent = slideNum + ' / ' + totalSlides;
+        floatingSectionInfo.textContent = sectionName + ' \u00B7 ' + sectionTime;
+        progressBar.style.width = ((slideNum / totalSlides) * 100) + '%';
+
+        // Update TOC active state
+        document.querySelectorAll('.toc-item').forEach(item => item.classList.remove('active'));
+        const sectionNum = slide.dataset.section;
+        const sectionSlideMap = { '0': 1, '1': 8, '2': 18, '3': 31, '4': 36, '5': 43 };
+        const targetSlide = sectionSlideMap[sectionNum];
+        if (targetSlide !== undefined) {
+          const tocItem = document.querySelector('.toc-item[data-target="' + targetSlide + '"]');
+          if (tocItem) tocItem.classList.add('active');
+        }
+      }
+    });
+  }, { root: container, threshold: 0.5 });
+
+  slides.forEach(slide => observer.observe(slide));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      const next = Math.min(currentSlide, totalSlides - 1);
+      slides[next]?.scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prev = Math.max(currentSlide - 2, 0);
+      slides[prev]?.scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'Escape') {
+      closeToc();
+    }
+  });
+
+  // TOC functions
+  window.toggleToc = function() {
+    const overlay = document.getElementById('toc-overlay');
+    overlay.classList.toggle('open');
+  };
+
+  window.closeToc = function() {
+    document.getElementById('toc-overlay').classList.remove('open');
+  };
+
+  window.closeTocOutside = function(e) {
+    if (e.target === document.getElementById('toc-overlay')) {
+      closeToc();
+    }
+  };
+
+  window.jumpToSlide = function(slideNum) {
+    closeToc();
+    const target = document.querySelector('.slide[data-slide="' + slideNum + '"]');
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  };
+
+// Quiz interactivity
+  document.querySelectorAll('.quiz-options').forEach(optionsList => {
+    const items = optionsList.querySelectorAll('li');
+    const answerDiv = optionsList.closest('.quiz-card').querySelector('.quiz-answer');
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        if (item.classList.contains('disabled')) return;
+        const isCorrect = item.dataset.correct === 'true';
+        items.forEach(li => {
+          li.classList.add('disabled');
+          if (li.dataset.correct === 'true') li.classList.add('correct');
+          else if (li === item && !isCorrect) li.classList.add('wrong');
+        });
+        if (answerDiv) answerDiv.classList.add('revealed');
+      });
+    });
+  });
+
+  // Add id attributes for hash navigation
+  slides.forEach(slide => {
+    slide.id = 'slide-' + slide.dataset.slide;
+  });
+
+  // Hash navigation: jump to slide on load and on hash change
+  function handleHash() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#slide-')) {
+      const target = document.querySelector(hash);
+      if (target) setTimeout(() => target.scrollIntoView(), 100);
+    }
+  }
+  window.addEventListener('hashchange', handleHash);
+  handleHash();
+
+  // Update hash on scroll
+  const hashObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+        history.replaceState(null, '', '#slide-' + entry.target.dataset.slide);
+      }
+    });
+  }, { root: container, threshold: 0.5 });
+  slides.forEach(slide => hashObserver.observe(slide));
+
+  // Refresh ScrollTrigger after load
+  ScrollTrigger.refresh();
+})();
+</script>
+</body>
+</html>
